@@ -1,0 +1,108 @@
+CRAWLER_FILTER(1)
+================
+:doctype: manpage
+
+NAME
+----
+crawler_filter - sorts and prunes (filters) reporting data
+
+SYNOPSIS
+--------
+*crawler_filter* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_filter(1) tool sorts synthesis reports, within each crawled site,
+according to the number of TUs and then on the alignment scores. The tool also
+prunes synthesis reports on a TU number lower threshold and on an alignment
+score variance to mean ratio upper threshold. The tool also prunes the full
+reports based on two criteria: distance-to-median based outlier detection, and
+TUs coming from original web sites that do not share the domain name with the
+crawled web site. Each of these options is not enforced by default. The tool
+also prunes TUs having TUVs with more than a certain percentage of
+miss-spellings (detected on the basis of aspell(1)), and TUs having inter-TUV
+length ratios outside a specified range. Last but not least, the tool also
+prunes the TUs which do not have any TUV in a language that is among the
+official languages of the countries the original web sites reside in, if the
+countries can be identified. For any filtering, in order to generate consistent
+synthesis and full reports, the pruned synthesis reports are projected on full
+reports' data, and the pruned full reports are projected back on the synthesis
+report data. So, basically the crawler_filter(1) can also be run as
+a "projector" in order to make a synthesis report consistent with a full report.
+This is achieved by not selecting any of the filtering options. Example
+scenario: crawler_filter(1) takes a pruned synthesis report according to
+a specified language pair, and the complete full report; hence, the tool will
+project the synthesis, thus pruning the full report so that it only contains TUs
+in the languages listed in the synthesis report.
+
+OPTIONS
+-------
+*-rs*::
+    Synthesis report file name.
+
+*--length-ratio-range*::
+    Prune TUs having the length ratio out of the specified range. This range can
+    be specified as [low:high], with two particular cases: [:high] yields an
+    implicit low of 0.0, and [low:] yields an implicit high of infinity.
+
+*--outlier-threshold*::
+    Prune entries with a deviation to median ratio greater than the specified
+    value (infinity by default).
+
+*--keep-only-official-languages*::
+    Prune all TUs that do not have any TUV in a language that is among the
+    official languages of the countries the original web sites reside in, if
+    these countries can be identified. If no country can be identified for the
+    original web sites, then this filter has no effect. Else, if the country can
+    be identified for one TUV only, then its language only will be verified
+    against the official languages of the identified country.
+
+*--prune-different-origins*::
+    Prune entries with original sites which are different from the crawled site
+    (false by default).
+
+*--prune-missspellings-percent*::
+    Prune TUs having at least one TUV containing strictly more than the
+    specified percent of miss-spelled tokens, out of the total number of tokens
+    in the TUV, according to aspell (100 by default). Please note that this
+    feature requires to have aspell installed, along with support for the
+    language(s) under scrutiny.
+
+*--sigma-mu-threshold*::
+    Prune entries with a score variance to mean ratio greater than the specified
+    value (infinity by default).
+
+*--tu-threshold*::
+    Prune entries with less than the specified number of TUs (1 by default).
+
+*-d*::
+    Delimiter for the reports CSV files.
+
+*-rf*::
+    Full report file name.
+
+*-version*::
+    Print the version of this build and exit.
+
+*-help,--help,-?*::
+    Print this help text and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially read IO error, or ill-formed input data errors).
+
+AUTHOR
+------
+crawler_filter was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

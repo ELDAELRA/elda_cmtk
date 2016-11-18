@@ -1,0 +1,73 @@
+CRAWLER_METACLEANER(1)
+=====================
+:doctype: manpage
+
+NAME
+----
+crawler_metacleaner - cleans up duplicate crawled sites across batches
+
+SYNOPSIS
+--------
+*crawler_metacleaner* 'DIR-PATTERN' 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_metacleaner(1) tool looks in a directory or set of directories
+specified in a positional and compulsory pattern argument. These directories are
+supposed to contain crawled data, structured on a per-crawled site basis. The
+directory pattern can be specified either as a glob pattern (default operation),
+or as a regular expression pattern. The tool detects web sites which have been
+crawled in several batches, assuming that a web site of the form
+http://foo.bar/baz is the same as http://foo.bar, as sub-pages are abstracted
+away anyway upon crawling. The detected duplicate sites are placed in an output
+directory which can be either user-specified, or chosen by default, with the
+name duplicate_fix_part_of_DIR-PATTERN, e.g. if the DIR-PATTERN is
+batches/crawls_*, then the output directory is batches/duplicate_crawls_. If the
+same site has been crawled several times, all crawls will be stored in the
+output directory, with ordinal suffixes, e.g. if http://foo.bar has been crawled
+three times and http://foo.bar/baz has been crawled one time, then, in the
+output directory, we will have www.foo.bar, www.foo.bar.1 and www.foo.bar__baz.
+The cleaning policy can be specified as either "keep the oldest crawl" of a web
+site, or as "keep the newest crawl", putting the others in the output directory.
+By default, the oldest crawl is kept and the newer ones are discarded to the
+duplicates output directory. The "oldest" / "newest" status is accounted for in
+terms of directory modification time.
+
+OPTIONS
+-------
+*--keep-newest*  {false|true}::
+    Keeps the newest duplicate crawled web sites and discards the older ones to
+    the output directory holding duplicate sites (false by default).
+
+*--regex*::
+    Use regular expression in the input directory pattern, instead of glob
+    (false by default).
+
+*-o*::
+    Output directory (duplicate_fixed_part_of_DIR-PATTERN by default).
+
+*-help,--help,-?*::
+    Print program help text and exit.
+
+*-version*::
+    Print program build version and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially directory access input/output errors).
+
+AUTHOR
+------
+crawler_metacleaner was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

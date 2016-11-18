@@ -1,0 +1,40 @@
+OASISFormat: 0.4
+Name:        crawler_backuper
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler TUs backup tool
+Description: 
+  ELDA ILSP-FC crawled TUs backup tool, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), StdFiles (0.4), DevFiles (0.4)
+BuildTools:  ocamldoc, ocamlbuild
+XStdFilesREADME: false
+
+Flag strict
+  Description: Strict compile-time checks
+  Default:     true
+
+Executable crawler_backuper
+  Path:           .
+  Install:        false
+  MainIs:         crawler_backuper.ml
+  CompiledObject: native
+  BuildDepends:
+    re.glob,
+    parmap,
+    threads,
+    core,
+    ppx_jane,
+    async
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_backuper
+  Title: API reference for crawler_backuper
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_backuper
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

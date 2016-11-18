@@ -1,0 +1,33 @@
+OASISFormat: 0.4
+Name:        crawler_metacleaner
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler duplicate sites cleaning tool
+Description: 
+  ELDA ILSP-FC duplicate crawled sites cleaning tool, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_metacleaner
+  Path:           .
+  Install:        false
+  MainIs:         crawler_metacleaner.ml
+  CompiledObject: native
+  BuildDepends:
+    str,
+    pcre,
+    threads,
+    core
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_metacleaner
+  Title: API reference for crawler_metacleaner
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_metacleaner
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

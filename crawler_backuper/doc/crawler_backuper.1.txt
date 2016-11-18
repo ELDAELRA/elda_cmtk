@@ -1,0 +1,62 @@
+CRAWLER_BACKUPER(1)
+==================
+:doctype: manpage
+
+NAME
+----
+crawler_backuper - backs up crawled data into zip archives
+
+SYNOPSIS
+--------
+*crawler_backuper* 'OPTIONS' 
+
+DESCRIPTION
+-----------
+The crawler_backuper(1) tool starts from a root directory containing crawled
+data, and from a pattern of subdirectories (a.k.a. crawling "batches"). It
+automatically extracts all files of the specified extensions and puts them to
+a zip archive associated and eponymous to each crawling batch directory. All zip
+archives are placed in a specified output directory.
+
+OPTIONS
+-------
+
+*--pattern*::
+    Glob pattern of the directories containing crawling data (a.k.a.  batches).
+
+*-b*::
+    Back-up directory where all per-batch ZIP archives are placed.
+
+*-r*::
+    Root directory to look for crawling batches.
+
+*--file-types*::
+    List of file types to be backed-up (.txt, .tmx, .xml and .html by default).
+    The user-specified list is separated by ';' and contains the extensions,
+    without the dot prefix.
+
+*-help,--help*::
+    Print program help and exit.
+
+*-version*::
+    Print program build version and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially system I/O error).
+
+AUTHOR
+------
+crawler_backuper was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

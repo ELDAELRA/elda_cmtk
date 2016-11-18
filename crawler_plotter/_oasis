@@ -1,0 +1,37 @@
+OASISFormat: 0.4
+Name:        crawler_plotter
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler result plotting tool
+Description:
+  ELDA ILSP-FC crawling results plotter, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_plotter
+  Path:           .
+  Install:        false
+  MainIs:         crawler_plotter.ml
+  CompiledObject: native
+  NativeOpt: -linkall
+  BuildDepends:
+    csv,
+    str,
+    cairo2,
+    archimedes.cairo,
+    threads,
+    core,
+    ppx_jane
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_plotter
+  Title: API reference for crawler_plotter
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_plotter
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

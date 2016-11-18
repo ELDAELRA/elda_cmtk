@@ -1,0 +1,35 @@
+OASISFormat: 0.4
+Name:        crawler_dbdumper
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler result database dumping tool
+Description:
+  ELDA ILSP-FC crawling results database dumper, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_dbdumper
+  Path:           .
+  Install:        false
+  MainIs:         crawler_dbdumper.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    str,
+    postgresql,
+    orm.syntax,
+    threads,
+    core
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_dbdumper
+  Title: API reference for crawler_dbdumper
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_dbdumper
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

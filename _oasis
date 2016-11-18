@@ -1,0 +1,295 @@
+OASISFormat: 0.4
+Name:        elda_cmtk
+Version:     1.1.1
+Synopsis:    ELDA CEF/ELRC crawling management toolkit
+Description: 
+  ELDA tools for managing the crawling process
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), StdFiles (0.4), DevFiles (0.4)
+BuildTools:  ocamldoc, ocamlbuild
+XStdFilesREADME: false
+
+Flag strict
+  Description: Strict compile-time checks
+  Default:     true
+
+Executable crawler_aggregator
+  Path:           crawler_aggregator
+  Install:        true
+  MainIs:         crawler_aggregator.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    gsl,
+    str,
+    pcre,
+    threads,
+    core,
+    ppx_jane
+
+Executable crawler_backuper
+  Path:           crawler_backuper
+  Install:        true
+  MainIs:         crawler_backuper.ml
+  CompiledObject: native
+  BuildDepends:
+    re.glob,
+    parmap,
+    threads,
+    core,
+    ppx_jane,
+    async
+
+Executable crawler_dbdumper
+  Path:           crawler_dbdumper
+  Install:        true
+  MainIs:         crawler_dbdumper.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    str,
+    postgresql,
+    orm.syntax,
+    threads,
+    core
+
+Executable crawler_dbretriever
+  Path:           crawler_dbretriever
+  Install:        true
+  MainIs:         crawler_dbretriever.ml
+  CompiledObject: native
+  BuildDepends:
+    postgresql,
+    csv,
+    pcre,
+    threads,
+    core,
+    ppx_jane
+
+Executable crawler_filter
+  Path:           crawler_filter
+  Install:        true
+  MainIs:         crawler_filter.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    oml,
+    camomile,
+    pcre,
+    threads,
+    core,
+    ppx_jane,
+    async,
+    parmap
+
+Executable crawler_launcher
+  Path:           crawler_launcher
+  Install:        true
+  MainIs:         crawler_launcher.ml
+  CompiledObject: native
+  BuildDepends:
+    parmap,
+    csv,
+    str,
+    threads,
+    core,
+    ppx_jane,
+    async
+
+Executable crawler_metacleaner
+  Path:           crawler_metacleaner
+  Install:        true
+  MainIs:         crawler_metacleaner.ml
+  CompiledObject: native
+  BuildDepends:
+    str,
+    pcre,
+    threads,
+    core
+
+Executable crawler_plotter
+  Path:           crawler_plotter
+  Install:        true
+  MainIs:         crawler_plotter.ml
+  CompiledObject: native
+  NativeOpt: -linkall
+  BuildDepends:
+    csv,
+    str,
+    cairo2,
+    archimedes.cairo,
+    threads,
+    core,
+    ppx_jane
+
+Executable crawler_pprinter
+  Path:           crawler_pprinter
+  Install:        true
+  MainIs:         crawler_pprinter.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    str,
+    threads,
+    core
+
+Executable crawler_reporter
+  Path:           crawler_reporter
+  Install:        true
+  MainIs:         crawler_reporter.ml
+  CompiledObject: native
+  BuildDepends:
+    xml-light,
+    gsl,
+    csv,
+    pcre,
+    threads,
+    core,
+    ppx_jane
+
+Executable crawler_sampler
+  Path:           crawler_sampler
+  Install:        true
+  MainIs:         crawler_sampler.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    str,
+    pcre,
+    threads,
+    core,
+    core_extended,
+    ppx_jane
+
+Executable crawler_qcintegrator
+  Path:           crawler_qcintegrator
+  Install:        true
+  MainIs:         crawler_qcintegrator.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    threads,
+    core,
+    re2,
+    ppx_jane,
+    parmap
+
+AlphaFeatures: ocamlbuild_more_args
+Document elda_cmtk
+  Title: API reference for the ELDA crawler management toolkit (CMTK)
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: crawler_aggregator/Crawler_aggregator,
+                      crawler_backuper/Crawler_backuper,
+                      crawler_dbdumper/Crawler_dbdumper,
+                      crawler_dbretriever/Crawler_dbretriever,
+                      crawler_filter/Crawler_filter,
+                      crawler_launcher/Crawler_launcher,
+                      crawler_metacleaner/Crawler_metacleaner,
+                      crawler_plotter/Crawler_plotter,
+                      crawler_pprinter/Crawler_pprinter,
+                      crawler_reporter/Crawler_reporter,
+                      crawler_sampler/Crawler_sampler
+                      crawler_qcintegrator/Crawler_qcintegrator
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"
+
+Document "crawler_aggregator-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_aggregator
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_aggregator/doc/crawler_aggregator.1.txt && mv crawler_aggregator/doc/crawler_aggregator.1 $mandir/man1/
+    DataFiles: crawler_aggregator/doc/crawler_aggregator.1
+    InstallDir: $mandir/man1
+
+Document "crawler_backuper-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_backuper
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_backuper/doc/crawler_backuper.1.txt && mv crawler_backuper/doc/crawler_backuper.1 $mandir/man1/
+    DataFiles: crawler_backuper/doc/crawler_backuper.1
+    InstallDir: $mandir/man1
+
+Document "crawler_dbdumper-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_dbdumper
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_dbdumper/doc/crawler_dbdumper.1.txt && mv crawler_dbdumper/doc/crawler_dbdumper.1 $mandir/man1/
+    DataFiles: crawler_dbdumper/doc/crawler_dbdumper.1
+    InstallDir: $mandir/man1
+
+Document "crawler_dbretriever-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_dbretriever
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_dbretriever/doc/crawler_dbretriever.1.txt && mv crawler_dbretriever/doc/crawler_dbretriever.1 $mandir/man1/
+    DataFiles: crawler_dbretriever/doc/crawler_dbretriever.1
+    InstallDir: $mandir/man1
+
+Document "crawler_filter-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_filter
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_filter/doc/crawler_filter.1.txt && mv crawler_filter/doc/crawler_filter.1 $mandir/man1/
+    DataFiles: crawler_filter/doc/crawler_filter.1
+    InstallDir: $mandir/man1
+
+Document "crawler_launcher-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_launcher
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_launcher/doc/crawler_launcher.1.txt && mv crawler_launcher/doc/crawler_launcher.1 $mandir/man1/
+    DataFiles: crawler_launcher/doc/crawler_launcher.1
+    InstallDir: $mandir/man1
+
+Document "crawler_metacleaner-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_metacleaner
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_metacleaner/doc/crawler_metacleaner.1.txt && mv crawler_metacleaner/doc/crawler_metacleaner.1 $mandir/man1/
+    DataFiles: crawler_metacleaner/doc/crawler_metacleaner.1
+    InstallDir: $mandir/man1
+
+Document "crawler_plotter-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_plotter
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_plotter/doc/crawler_plotter.1.txt && mv crawler_plotter/doc/crawler_plotter.1 $mandir/man1/
+    DataFiles: crawler_plotter/doc/crawler_plotter.1
+    InstallDir: $mandir/man1
+
+Document "crawler_pprinter-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_pprinter
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_pprinter/doc/crawler_pprinter.1.txt && mv crawler_pprinter/doc/crawler_pprinter.1 $mandir/man1/
+    DataFiles: crawler_pprinter/doc/crawler_pprinter.1
+    InstallDir: $mandir/man1
+
+Document "crawler_reporter-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_reporter
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_reporter/doc/crawler_reporter.1.txt && mv crawler_reporter/doc/crawler_reporter.1 $mandir/man1/
+    DataFiles: crawler_reporter/doc/crawler_reporter.1
+    InstallDir: $mandir/man1
+
+Document "crawler_sampler-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_sampler
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_sampler/doc/crawler_sampler.1.txt && mv crawler_sampler/doc/crawler_sampler.1 $mandir/man1/
+    DataFiles: crawler_sampler/doc/crawler_sampler.1
+    InstallDir: $mandir/man1
+
+Document "crawler_qcintegrator-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_qcintegrator
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_qcintegrator/doc/crawler_qcintegrator.1.txt && mv crawler_qcintegrator/doc/crawler_qcintegrator.1 $mandir/man1/
+    DataFiles: crawler_qcintegrator/doc/crawler_qcintegrator.1
+    InstallDir: $mandir/man1

@@ -1,0 +1,151 @@
+CRAWLER_AGGREGATOR(1)
+====================
+:doctype: manpage
+
+NAME
+----
+crawler_aggregator - aggregates information from the crawling synthetic and full reports
+
+SYNOPSIS
+--------
+*crawler_aggregator* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_aggregator(1) tool uses a pair of synthesis and full reports in
+order to generate different aggregations. These aggregations can be either
+per-crawled site or per-language pair. When the per-language pair aggregation is
+generated, a language pair frequency matrix is also generated. This matrix is
+symmetric, as the language pairs are commutative in it. Thus, only half the
+matrix can be used for reliable subsequent computations.
+
+The crawler_aggregator(1) tool can generate three output files, depending on the
+user-specified aggregation type, as explained below.
+
+When using the 'per-site' aggregation type, the tool generates a single CSV
+file: 'SYNTHESIS_REPORT'_per_site_aggregation.csv
+
+This file contains 11 columns per crawled web site entry:
+
+- "Web site": the crawled web site
+
+- "Provenance": provenance of the web site (viz. country if deducible from the
+  web site TLD, or "Unknown (extension: {extension}) if {extension} is among
+  'biz', 'eu', 'info', 'com', 'org', 'net', 'int').
+
+- "Languages": ISO-639-1 language codes for all languages that have yielded
+  TUs for the web site. The language codes are separated by ' & '.
+
+- "Token counts": total token count for all TUs yielded by the web site,
+  irrespective of their TUV's languages.
+
+- "TU counts": total number of TUs yielded by the crawled web site.
+
+- "Average alignment score mean": arithmetic mean of all per-language pair
+  alignment score means.
+
+- "Average alignment score variance": arithmetic mean of all per-language pair
+  alignment score variances.
+
+- "Average length ratio mean": arithmetic mean of all per-language pair
+  length ratio means.
+
+- "Average length ratio variance": arithmetic mean of all per-language pair
+  length ratio variances.
+
+- "Third-party sites TU ratio": ratio between the number of TUs coming from
+  third-party sites and the total number of TUs yielded by the crawled web
+  site (including those coming from third-party sites).
+
+- "Number of distinct third-party sites": number of distinct third-party sites
+  having yielded TUs, for the crawled web site.
+
+When using the 'per-language-pair' aggregation type, the tool generates two
+CSV files: 'SYNTHESIS_REPORT'_per_language_pair_aggregation.csv, and
+'SYNTHESIS_REPORT'_per_language_pair_confusion_matrix.csv.
+
+The 'SYNTHESIS_REPORT'_per_language_pair_aggregation.csv file contains one entry
+per language pair. For each entry, there are 11 columns:
+
+- "Source language": The ISO-639-1 language code of the language of the
+  first TUV (as indicated in the ILSP-FC-generated TMX files).
+
+- "Target language": The ISO-639-1 language code of the language of the
+  second TUV.
+
+- "Source language token counts": total number of tokens in the "source"
+  language.
+
+- "Target language token counts": total number of tokens in the "target"
+  language.
+
+- "Number of sites": number of crawled web sites for the "source" / "target"
+  language pair.
+
+- "Number of provenances": number of countries (plus the "Unknown" if
+  applicable) of the sites yielding the TUs in the "source" / "target"
+  language pair.
+
+- "TU counts": total number of TUs in the language pair.
+
+- "Average alignment score mean": arithmetic mean of the per-site aligment
+  score means, for the relevant language pair.
+
+- "Average alignment score variance": arithmetic mean of the per-site
+  alignment score variances, for the relevant language pair.
+
+- "Average length ratio mean": arithmetic mean of the per-site length ratio
+  means, for the relevant language pair.
+
+- "Average length ratio variance": arithmetic mean of the per-site length
+  ratio variances, for the relevant language pair.
+
+The 'SYNTHESIS_REPORT'_per_language_pair_confusion_matrix.csv file contains the
+per-language pair TU occurrence counts matrix, i.e. the symmetic matrix issued
+from the per-language pair TU histogram.
+
+When using the 'both' aggregation type, all three files are generated.
+
+OPTIONS
+-------
+
+*-a* 'AGGREGATION_TYPE'::
+    Statistics aggregation type.
+    Can be either of per-site; per-language-pair; both.
+
+*-rs* 'SYNTHESIS_REPORT'::
+    Name of the report synthesis report file.
+
+*-rf* 'FULL REPORT'::
+    Name of the full report file.
+
+*-d* 'DELIMITER'::
+    Delimiter of the CSV report files. The same delimiter is used for input and
+    output.
+
+*-help,--help*::
+    Display this list of options.
+
+*-version*::
+    Print program build version and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially related to erroneous input synthesis and full report
+    files).
+
+AUTHOR
+------
+crawler_aggregator was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

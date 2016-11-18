@@ -1,0 +1,57 @@
+opam-version: "1.2"
+name: "elda_cmtk"
+version: "1.1.1"
+maintainer: "Vladimir Popescu <vladimir@elda.org>"
+authors: [ "Vladimir Popescu" ]
+license: "GPL v3"
+available: [ ocaml-version >= "4.03.0" ]
+build: [
+  ["oasis" "setup" "-setup-update" "dynamic"]
+  ["make"]
+]
+build-doc: [ "make doc" ]
+install: [
+    ["./configure" "--exec-prefix" "%{prefix}%" "--mandir" "%{man}%" "--datarootdir" "%{prefix}%"]
+    ["make" "install"]
+    ["make" "doc"]
+]
+remove: [
+    ["rm" "-f" "%{bin}%/crawler_aggregator" "%{bin}%/crawler_backuper"]
+    ["rm" "-f" "%{bin}%/crawler_dbdumper" "%{bin}%/crawler_dbretriever"]
+    ["rm" "-f" "%{bin}%/crawler_filter" "%{bin}%/crawler_launcher"]
+    ["rm" "-f" "%{bin}%/crawler_metacleaner" "%{bin}%/crawler_plotter"]
+    ["rm" "-f" "%{bin}%/crawler_pprinter" "%{bin}%/crawler_reporter"]
+    ["rm" "-f" "%{bin}%/crawler_sampler" "%{bin}%/crawler_qcintegrator"]
+    ["rm" "-f" "%{man}%/man1/crawler_aggregator.1" "%{man}%/man1/crawler_backuper.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_dbdumper.1" "%{man}%/man1/crawler_dbretriever.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_filter.1" "%{man}%/man1/crawler_launcher.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_metacleaner.1" "%{man}%/man1/crawler_plotter.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_pprinter.1" "%{man}%/man1/crawler_reporter.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_sampler.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_qcintegrator.1"]
+    ["rm" "-fr" "%{doc}%/elda_cmtk" "%{share}%/elda_cmtk"]
+    ["ocamlfind" "remove" "elda_cmtk"]
+]
+depends: [
+  "archimedes" {build}
+  "async" {build}
+  "base-threads" {build}
+  "cairo2" {build}
+  "camomile" {build}
+  "core" {build}
+  "core_extended" {build}
+  "csv" {build}
+  "gsl" {build}
+  "oasis" {build & >= "0.4"}
+  "ocamlbuild" {build}
+  "ocamlfind" {build}
+  "oml" {build}
+  "orm" {build}
+  "parmap" {build}
+  "pcre" {build}
+  "postgresql" {build}
+  "ppx_jane" {build}
+  "re.glob" {build}
+  "re2" {build}
+  "xml-light" {build}
+]

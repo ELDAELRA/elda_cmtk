@@ -1,0 +1,75 @@
+CRAWLER_SAMPLER(1)
+=================
+:doctype: manpage
+
+NAME
+----
+crawler_sampler - samples TU-level reporting information
+
+SYNOPSIS
+--------
+*crawler_sampler* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_sampler(1) tool uses a full report to perform a sampling on it. The
+sampling is random and customizable with respect to the percentage of the
+sampling population, and to the number of sampling repetitions. The sampling
+repetitions are disjoint within a sampling process. The sampling population can
+be filtered by language pair, list of original web sites, and list of crawled
+sites. For the original web sites, a TU is kept in the population if at least
+a TUV comes from a site in the list of original web sites. For the crawled web
+sites, a TU is kept if both TUVs come from original web sites whose domain name
+'includes' (i.e. is a subdomain of) the domain name of the crawled web site.
+The output is a CSV file of the same format as the full report, with the
+repetitions separated by dashed lines.
+
+OPTIONS
+-------
+*-R*::
+    Full report file name.
+
+*-p*::
+    Sample percentage of the total population size.
+
+*-c*::
+    List of crawled web sites, separated by ",".
+
+*-d*::
+    CSV delimiter (";" by default).
+
+*-l*::
+    Language pair, as e.g. "en,fr". The language pairs are commutative.
+
+*-r*::
+    Number of sampling repetitions (1 by default).
+
+*-s*::
+    List of original web sites, separated by ",".
+
+*-version*::
+    Print program build version and exit.
+
+*-help,--help,-?*::
+    Print program help and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially IO or ill-formed data errors related to the input full
+    report).
+
+AUTHOR
+------
+crawler_sampler was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

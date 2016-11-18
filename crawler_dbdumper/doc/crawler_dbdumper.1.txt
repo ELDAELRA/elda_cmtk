@@ -1,0 +1,95 @@
+CRAWLER_DBDUMPER(1)
+==================
+:doctype: manpage
+
+NAME
+----
+crawler_dbdumper - dumps reporting data to databases
+
+SYNOPSIS
+--------
+*crawler_dbdumper* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_dbdumper(1) tool ingests synthesis and full reports, as well as
+per-site and per-language pair aggregation data in the CSV format, and dumps
+them to databases. One database is filled in for each of the four kinds of CSV
+input files. Two backends are available: PostgreSQL (by default) and SQLite. Two
+kinds of dump can be done: "shallow" (by default) i.e. in tables that have the
+very same structure as the input CSV files, or "deep", i.e. in separate tables
+for closed-class entities, such as as languages or countries, and with proper
+relations between the different entities. The PostgreSQL backend only supports
+shallow dumps of synthesis and full reports. The SQLite backend supports both
+shallow and deep dupps of all kinds of expected input data, namely synthesis and
+full reports, as well as per-site and per-language pair aggregations. When the
+PostgreSQL backend is used, all entries are dumped at once, which is fast. When
+the SQLite backend is used, each entry is dumped in a separate INSERT query to
+the database, which is much slower than for the PostgreSQL dump.
+
+All dumps have an auto-incrementing '__id__' first field, followed by the rest
+of fields, which correspond in a one-to-one fashion to the CSV fields of the
+reports, for the "shallow" dump, and which replace the language and
+provenance-related fields in the CSVs with foreign keys pointing to language and
+provenance tables for the "deep" dumps.
+
+OPTIONS
+-------
+
+*-d*::
+    Delimiter of the CSV input files.
+*-i*::
+    Name of the input CSV file.
+*-o*::
+    Name of the database (PostgreSQL address or SQLite file). For now, only
+    output names starting with "report" or containing "per" and "aggregation"
+    are accepted. If no output name is provided, it is inferred from the input
+    name, as: ${input_name%.sqlite} for the SQLite backend, and
+    postgresql:///{synthesis|full|per_site_aggregation|
+    per_language_pair_aggregation}_data for the PostgreSQL backend. for
+    PostgreSQL, this involves that the tool expects to have four databases
+    available, namely synthesis_data, full_data, per_site_aggregation_data,
+    per_language_pair_aggregation_data.
+
+*--deep*::
+    Dump data in deep mode (disabled by default). Hence, by default data is
+    dumped with a structure that is isomorphic to the structure of the input CSV
+    files.  If '--deep' is used, then languages and countries are dumped to
+    separate tables and accessed via foreign keys in the main tables. 
+
+*--warn*::
+    Warn if we are about to insert duplicate data. This is disabled by default.
+    When enabled, when about to insert duplicate data, the user is prompted with
+    this indication and asked to select whether the dump should proceed or not.
+
+*--backend::
+    Database backend type (postgresql by default). Can also be sqlite.
+
+*--username*::
+    PostgreSQL user name (current login by default).
+
+*--password*::
+    PostgreSQL password (required only when the PostgreSQL backend is used).
+
+*-help,--help*::
+    Print program help and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially read error or ill-formed input data errors).
+
+AUTHOR
+------
+crawler_dbdumper was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

@@ -1,0 +1,36 @@
+OASISFormat: 0.4
+Name:        crawler_launcher
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler management tool
+Description: 
+  ELDA ILSP-FC crawler launcher, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_launcher
+  Path:           .
+  Install:        false
+  MainIs:         crawler_launcher.ml
+  CompiledObject: native
+  BuildDepends:
+    parmap,
+    csv,
+    str,
+    threads,
+    core,
+    ppx_jane,
+    async
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_launcher
+  Title: API reference for crawler_launcher
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_launcher
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

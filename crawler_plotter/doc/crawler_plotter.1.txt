@@ -1,0 +1,60 @@
+CRAWLER_PLOTTER(1)
+=================
+:doctype: manpage
+
+NAME
+----
+crawler_plotter - plots per-language language pair distributions of TU counts
+
+SYNOPSIS
+--------
+*crawler_plotter* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_plotter(1) tool takes a per-language pair aggregation file (as
+generated via the crawler_aggregator tool) and outputs a set of per-language
+pair frequency histograms in the PDF format. The histograms are "commutative" in
+that the same language pair is counted twice, as each member of a pair is
+considered a source language and its histogram with respect to all other
+languages is computed. For example, assuming we have the pairs English-French
+and French-Portuguese, and English-Portuguese, we will have three histograms,
+with the following contents: English histogram: values for French and
+Portuguese; French histogram: values for English and Portuguese; Portuguese
+histogram: values for English and French.
+
+OPTIONS
+-------
+*-A*::
+    Per-language pair aggregation file.
+
+*-d*::
+    CSV delimiter for the per-language pair aggregation file (; by default).
+
+*-version*::
+    Print the program build version and exit.
+
+*-help,--help,-?*::
+    Print this help text and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially IO error or ill-formed data on the input file, or IO
+    errors on the generation of the output files, namely when there are missing
+    dependencies).
+
+AUTHOR
+------
+crawler_plotter was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

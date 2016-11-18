@@ -1,0 +1,107 @@
+/**************************************************************************
+ * Copyright (C) 2016 Evaluations and Language Resources Distribution     *
+ * Agency (ELDA) S.A.S (Paris, FRANCE), all rights reserved.              *
+ * contact http://www.elda.org/ -- mailto:info@elda.org                   *
+ * Author: Vladimir Popescu -- mailto:vladimir@elda.org                   *
+ *                                                                        *
+ * This file is part of the ELDA Crawling Management Toolkit (ELDA-CMTK). *
+ *                                                                        *
+ * ELDA-CMTK is free software: you can redistribute it and/or modify it   *
+ * under the terms of the GNU General Public License as published by the  *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * ELDA-CMTK is distributed in the hope that it will be useful, but       *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU General Public License      *
+ * along with ELDA-CMTK, in the LICENSE file. If not, see                 *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
+digraph {
+    /* Uncommentthe line below only for PDF output. */
+    /* graph[dpi=300; fontsize=24]; */
+    
+    labelloc=t;
+    label = "ELDA Crawled Data Management Toolkit";
+
+    human[shape="circle", label="웃"];
+    urls[shape="box", style=rounded, label="{Input URLs}"];
+    tmxs[shape="box", style=rounded, label="{Crawled TMXs}"];
+    tmxs_dedup[shape="box", style=rounded, label="{Deduplicated TMXs}"];
+    tmxs_deback[shape="box", style=rounded, label="{De-backed-up TMXs}"];
+    zips[shape="box", style=rounded, label="{ZIP archives}"];
+    syntheses[shape="box", style=rounded, label="{Synthesis reports}"];
+    syntheses_db[shape="box", style=rounded, label="{Synthesis database}"];
+    syntheses_q[shape="box", style=rounded, label="{Queried synthesis reports}"];
+    syntheses_m[shape="box", style=rounded, label="{Merged synthesis reports}"];
+    syntheses_filtered[shape="box", style=rounded, label="{Filtered synthesis reports}"];
+    fulls[shape="box", style=rounded, label="{Full reports}"];
+    fulls_db[shape="box", style=rounded, label="{Full database}"];
+    fulls_filtered[shape="box", style=rounded, label="{Filtered full reports}"];
+    fulls_sampled[shape="box", style=rounded, label="{Sampled full reports}"];
+    fulls_q[shape="box", style=rounded, label="{Queried full reports}"];
+    fulls_m[shape="box", style=rounded, label="{Merged full reports}"];
+    fulls_pp[shape="box", style=rounded, label="{Pretty-printed full reports}"];
+    uniqurls[shape="box", style=rounded, label="{Unique TU-providing URLs}"];
+    site_aggregs[shape="box", style=rounded, label="{Per-site aggregations}"];
+    site_db[shape="box", style=rounded, label="{Per-site aggregation database}"];
+    site_q[shape="box", style=rounded, label="{Queried per-site aggregation}"];
+    lpair_aggregs[shape="box", style=rounded, label="{Per-language pair aggregations}"];
+    lpair_q[shape="box", style=rounded, label="{Queried per-language pair aggregations}"];
+    lpair_confmat[shape="box", style=rounded, label="{Per-language pair frequency matrix}"];
+    lpair_confmat_pp[shape="box", style=rounded, label="{Pretty-printed (pruned) per-language pair frequency matrices}"];
+    lpair_db[shape="box", style=rounded, label="{Per-language pair aggregation database}"];
+    lpair_histo[shape="box", style=rounded, label="{Per-language pair histogram(s)}"];
+    fulls_sampled_annotated[shape="box", style=rounded, label="{Manually-annotated TUs}"];
+    fulls_enriched[shape="box", style=rounded, label="{Full reports enriched with manual annotations}"];
+    psi_info[shape="box", style=rounded, label="{PSI validation information}"];
+    launcher[shape="box", style="", label="crawler_launcher"];
+    backuper[shape="box", style="", label="crawler_backuper"];
+    metacleaner[shape="box", style="", label="crawler_metacleaner"];
+    reporter[shape="box", style="", label="crawler_reporter"];
+    aggregator[shape="box", style="", label="crawler_aggregator"];
+    filter[shape="box", style="", label="crawler_filter"];
+    pprinter[shape="box", style="", label="crawler_pprinter"];
+    dbdumper[shape="box", style="", label="crawler_dbdumper"];
+    dbretriever[shape="box", style="", label="crawler_dbretriever"];
+    sampler[shape="box", style="", label="crawler_sampler"];
+    plotter[shape="box", style="", label="crawler_plotter"];
+    pgloader[shape="ellipse", fillcolor=grey, style=filled, label="pgloader"];
+    qcintegrator[shape="box", style="", label="crawler_qcintegrator"];
+
+    human -> urls[label="identification"];
+    urls -> launcher -> tmxs -> backuper -> zips;
+    tmxs -> reporter;
+    tmxs -> metacleaner -> tmxs_dedup -> reporter;
+    zips -> tmxs_deback[label="웃 (unzip)"];
+    tmxs_deback -> reporter;
+    reporter -> {syntheses; fulls; uniqurls};
+    {syntheses; fulls} -> aggregator;
+    aggregator -> {site_aggregs; lpair_aggregs; lpair_confmat};
+    {syntheses; fulls; site_aggregs; lpair_aggregs} -> dbdumper ->
+        {syntheses_db; fulls_db; site_db; lpair_db};
+    lpair_aggregs -> plotter -> lpair_histo;
+    fulls -> sampler -> fulls_sampled;
+    fulls_sampled -> human;
+    human -> fulls_sampled_annotated[label="manual validation"];
+    human -> psi_info[label="manual PSI validation"];
+    {fulls_sampled_annotated, psi_info} -> qcintegrator -> fulls_enriched;
+    {syntheses; fulls} -> filter -> {syntheses_filtered; fulls_filtered};
+    {lpair_confmat; fulls; fulls_sampled} -> pprinter -> {fulls_pp; lpair_confmat_pp};
+    fulls_pp -> human[label="quality control"];
+    {syntheses_db; fulls_db} -> dbretriever;
+    dbretriever -> {syntheses_q; fulls_q}[label="웃 (query, dump)"];
+    {site_db; lpair_db} -> pgloader -> dbretriever;
+    dbretriever -> {site_q; lpair_q}[label="웃 (query, dump)"];
+    {rank=same; human; urls; launcher; tmxs; backuper; zips};
+    {rank=same; metacleaner; tmxs_deback; tmxs_dedup};
+    {rank=same; syntheses; fulls; uniqurls};
+    {rank=same; syntheses_db; fulls_db; site_db; lpair_db};
+    {rank=same; pprinter; sampler; filter; aggregator};
+    {rank=same; lpair_aggregs; site_aggregs; lpair_confmat};
+    {rank=same; qcintegrator; dbretriever};
+
+}

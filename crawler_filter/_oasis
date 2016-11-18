@@ -1,0 +1,38 @@
+OASISFormat: 0.4
+Name:        crawler_filter
+Version:     0.0.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC crawler result filtering tool
+Description:
+  ELDA ILSP-FC crawling results filter, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_filter
+  Path:           .
+  Install:        false
+  MainIs:         crawler_filter.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    oml,
+    camomile,
+    pcre,
+    threads,
+    core,
+    ppx_jane,
+    async,
+    parmap
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_filter
+  Title: API reference for crawler_filter
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_filter
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"
