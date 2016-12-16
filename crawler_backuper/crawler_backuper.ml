@@ -130,11 +130,34 @@ struct
     let open CrawlerUtils in
     let open CrawlerZip in
     let batches = get_batches root_directory batch_name_pattern in
+    (* Split a list into sublists of length (at most) n. We don't care about the
+     * order of the files in the sublists, hence, for efficiency reasons, we
+     * don't do a List.rev on the result of the call to the auxiliary
+     * function. *)
+    let iter_split_n alist n =
+      let rec iter_split_n' alist n splits =
+        match alist with
+        | [] -> splits
+        | _ ->
+            let hd, tail = List.split_n alist n in
+            iter_split_n' tail n (hd :: splits) in
+      iter_split_n' alist n [] in
     Parmap.pariter (fun batch ->
         let zipname = Filename.basename batch ^ ".zip" in
         let files_to_zip = walk batch |> prune_dirtree ~extensions  in
-        make_zip
-          ~zipname ~destination_directory: (Some backup_directory) files_to_zip
+        (* Honor the ML_ARG_MAX = 4096 + 1. *)
+        if List.length files_to_zip <= 4094 then
+          make_zip
+            ~zipname ~destination_directory: (Some backup_directory)
+            files_to_zip
+        else
+          (* Decompose files_to_zip in <= 4094-length lists and iterate make_zip
+           * on each such sublist.*)
+          let splits = iter_split_n files_to_zip 4094 in
+          List.iter ~f: (fun files_to_zip_chunk ->
+            make_zip ~zipname ~destination_directory: (Some backup_directory)
+                     files_to_zip_chunk)
+          splits
       ) (Parmap.L batches)
 end
 

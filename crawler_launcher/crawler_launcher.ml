@@ -332,8 +332,10 @@ let command =
                            (Printf.sprintf "Unknown mode: %s" mode'))
          end in
        let lang = if lang' = "all" then
-           Subset [Bg; Hr; Cs; Da; Nl; En; Et; Fi; Fr; De; El; Hu; Ga; It; Lv;
-                   Lt; Pl; Pt; Ro; Sl; Es; Sv; No]
+           let all_langs = [Bg; Hr; Cs; Da; Nl; En; Et; Fi; Fr; De; El; Hu; Ga;
+                            It; Lv; Lt; Pl; Pt; Ro; Sl; Es; Sv; No] in
+           if version > "2.2.3" then Subset (Mt :: all_langs)
+           else Subset all_langs
          else
          if String.contains lang' ',' then
            String.concat ["(Subset ("; (String.split lang' ~on: ','

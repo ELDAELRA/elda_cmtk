@@ -255,10 +255,13 @@ end = struct
         struct
           type t = string * psi_scope_t [@@deriving sexp]
           let compare (xi, xs) (yi, ys) =
-            compare xi yi *
+            (* Combine web site and PSI status to spot several URLs
+               referring to the same web site, but with different PSIs.*)
             compare
-              (sexp_of_psi_scope_t xs |> Sexp.to_string)
-              (sexp_of_psi_scope_t ys |> Sexp.to_string)
+              (xi ^ (String.of_char delimiter) ^
+               (sexp_of_psi_scope_t xs |> Sexp.to_string))
+              (yi ^ (String.of_char delimiter) ^
+              (sexp_of_psi_scope_t ys |> Sexp.to_string))
         end) in
       List.map (List.tl_exn data) ~f: (function
         | _ :: url :: _ :: _ :: _ :: _ :: _ :: _ :: within_psi_scope :: _ ->
@@ -424,7 +427,8 @@ let command =
       let open Crawler_qcintegrator in
       let out_file =
         match out_fname' with
-        | None -> "annotated_" ^ tu_file
+        | None -> Filename.dirname tu_file ^/ "annotated_" ^
+                  Filename.basename tu_file
         | Some out_fname -> out_fname in
       manage_tus
         ~delimiter: (Char.of_string delimiter') ~tu_file ~sample_dir ~psi_file
