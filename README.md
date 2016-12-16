@@ -32,7 +32,7 @@ The tools run on native Linux / UNIX-compatible platforms, are implemented as PO
 12. Integrate the results of the manual TU-level quality control annotations and of the PSI validation into the TU information. This is implemented in the `crawler_qcintegrator` tool.
 13. Generate TMX files based on the manual quality control information and on the PSI information. This is implemented in the `crawler_tmxbuilder` tool.
 
-All tools are equipped with a command-line help system and with UNIX man pages. In order to get the gestalt of the toolkit, you can have a look at its synthetic [diagram](./elda_cmtk.svg).
+All tools are equipped with a command-line help system and with UNIX man pages. In order to get the gestalt of the toolkit, you can have a look at its synthetic [diagram](./doc/elda_cmtk.svg).
 
 Usage
 -----
