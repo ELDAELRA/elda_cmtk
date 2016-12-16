@@ -4,9 +4,9 @@ Software Toolkit for Crawling Management
 Synopsis
 --------
 
-The ELDA Crawled Data Management Toolkit helps the users to manage the crawling process using the ILSP's Focused Crawler, [ILSP-FC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc).
+The ELDA Crawled Data Management Toolkit helps the users to manage the crawling process using the ILSP's Focused Crawler, [ILSPFFC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc).
 
-The toolkit consists of a set of 11 command-line tools.
+The toolkit consists of a set of 13 command-line tools.
 
 The tools run on native Linux / UNIX-compatible platforms, are implemented as POSIX-like command-line tools and provide the following functionalities:
 
@@ -30,8 +30,9 @@ The tools run on native Linux / UNIX-compatible platforms, are implemented as PO
 10. Dump the various CSV reports (as built at 4 and 5) to SQL databases. This is implemented in the `crawler_dbdumper` tool.
 11. Interact with the SQL databases (handled with PostgreSQL) via a console allowing us to perform random SQL queries, as well as to dump in a straightforward manner the selected data in a CSV format compatible with the formats generated at 4 and 5. This is implemented in the `crawler_dbretriever` tool.
 12. Integrate the results of the manual TU-level quality control annotations and of the PSI validation into the TU information. This is implemented in the `crawler_qcintegrator` tool.
+13. Generate TMX files based on the manual quality control information and on the PSI information. This is implemented in the `crawler_tmxbuilder` tool.
 
-All tools are equipped with a command-line help system and with UNIX man pages. In order to get the gestalt of the toolkit, you can have a look at its synthetic [diagram](./doc/elda_cmtk.svg).
+All tools are equipped with a command-line help system and with UNIX man pages. In order to get the gestalt of the toolkit, you can have a look at its synthetic [diagram](./elda_cmtk.svg).
 
 Usage
 -----

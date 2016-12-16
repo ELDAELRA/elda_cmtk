@@ -1,25 +1,3 @@
-/**************************************************************************
- * Copyright (C) 2016 Evaluations and Language Resources Distribution     *
- * Agency (ELDA) S.A.S (Paris, FRANCE), all rights reserved.              *
- * contact http://www.elda.org/ -- mailto:info@elda.org                   *
- * Author: Vladimir Popescu -- mailto:vladimir@elda.org                   *
- *                                                                        *
- * This file is part of the ELDA Crawling Management Toolkit (ELDA-CMTK). *
- *                                                                        *
- * ELDA-CMTK is free software: you can redistribute it and/or modify it   *
- * under the terms of the GNU General Public License as published by the  *
- * Free Software Foundation, either version 3 of the License, or (at your *
- * option) any later version.                                             *
- *                                                                        *
- * ELDA-CMTK is distributed in the hope that it will be useful, but       *
- * WITHOUT ANY WARRANTY; without even the implied warranty of             *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- * General Public License for more details.                               *
- *                                                                        *
- * You should have received a copy of the GNU General Public License      *
- * along with ELDA-CMTK, in the LICENSE file. If not, see                 *
- * <http://www.gnu.org/licenses/>.                                        *
- *************************************************************************/
 digraph {
     /* Uncommentthe line below only for PDF output. */
     /* graph[dpi=300; fontsize=24]; */
@@ -29,7 +7,7 @@ digraph {
 
     human[shape="circle", label="웃"];
     urls[shape="box", style=rounded, label="{Input URLs}"];
-    tmxs[shape="box", style=rounded, label="{Crawled TMXs}"];
+    tmxs[shape="box", style=rounded, label="{TMX files}"];
     tmxs_dedup[shape="box", style=rounded, label="{Deduplicated TMXs}"];
     tmxs_deback[shape="box", style=rounded, label="{De-backed-up TMXs}"];
     zips[shape="box", style=rounded, label="{ZIP archives}"];
@@ -71,6 +49,7 @@ digraph {
     plotter[shape="box", style="", label="crawler_plotter"];
     pgloader[shape="ellipse", fillcolor=grey, style=filled, label="pgloader"];
     qcintegrator[shape="box", style="", label="crawler_qcintegrator"];
+    tmxbuilder[shape="box", style="", label="crawler_tmxbuilder"];
 
     human -> urls[label="identification"];
     urls -> launcher -> tmxs -> backuper -> zips;
@@ -89,6 +68,7 @@ digraph {
     human -> fulls_sampled_annotated[label="manual validation"];
     human -> psi_info[label="manual PSI validation"];
     {fulls_sampled_annotated, psi_info} -> qcintegrator -> fulls_enriched;
+    fulls_enriched -> tmxbuilder -> tmxs;
     {syntheses; fulls} -> filter -> {syntheses_filtered; fulls_filtered};
     {lpair_confmat; fulls; fulls_sampled} -> pprinter -> {fulls_pp; lpair_confmat_pp};
     fulls_pp -> human[label="quality control"];
@@ -102,6 +82,6 @@ digraph {
     {rank=same; syntheses_db; fulls_db; site_db; lpair_db};
     {rank=same; pprinter; sampler; filter; aggregator};
     {rank=same; lpair_aggregs; site_aggregs; lpair_confmat};
-    {rank=same; qcintegrator; dbretriever};
+    {rank=same; qcintegrator; dbretriever; tmxbuilder};
 
 }

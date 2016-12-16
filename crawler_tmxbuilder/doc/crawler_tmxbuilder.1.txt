@@ -1,0 +1,259 @@
+CRAWLER_TMXBUILDER(1)
+=====================
+:doctype: manpage
+
+NAME
+----
+crawler_tmxbuilder - cherry-picks TUs and builds TMX files
+
+SYNOPSIS
+--------
+*crawler_tmxbuilder* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The purpose of the crawler_tmxbuilder(1) tool is to generate TMX files
+from TU metadata, enriched through sample manual validation.
+
+The crawler_tmxbuilder-based processing involves two stages:
+
+1. Select which TUs to aggregate in a per-site and per-language pair TMX
+   file.
+
+2. Generate TMX files with appropriate metadata. For each site and language
+   pair, one TMX file is created.
+
+Point 1 is tackled based on the ratios of the following five issue types:
+
+- Alignment Error
+
+- Tokenization Error
+
+- Language identification Error
+
+- Translation error
+
+- Machine translated text.
+
+For each of these five issue types, two thresholds are user-specified: an
+inferior threshold (th_inf) and a superior threshold (th_sup). These thresholds
+are expressed as percentages of the total number of manually-checked TUs
+associated to a site and a language pair which have the error.
+
+Three possibilities exist:
+
+1. all of the above five error types' ratios are below the inferior threshold
+   th_inf.  Then, only the TUs containing the errors are discarded and, for all
+   errors, an "Unlikely" annotation is added at each TU level for each error
+   type.
+
+2. Any of the above five error types'ratios is above the superior threshold
+   th_sup.  Then, no sampling information is provided and all TUs from that site
+   are discarded.
+
+3. Any of the above five error types' ratios is above th_inf and below th_sup,
+   and no other error type's ratio is above th_sup. Then, only the TUs
+   containing the errors are discarded and for the other TUs associated to the
+   same site and language pair sampling information is provided (see the
+   "metadata" aspects below), in that the "Likely" annotation is added at each
+   TU level for this error type.
+
+Point 2 is tackled based on the 1.4b TMX specification
+(https://www.gala-global.org/tmx-14b), on the output produced by the ILSP-FC
+crawler, and on ELDA's data validation process.
+
+Thus, a TMX file represents the (XML) serialization of a tree structure having
+three types of nodes:
+
+- TMX nodes: there one single such node in a TMX file.
+
+- TU nodes: there are as many such nodes as TUs in a TMX file.
+
+- TUV nodes: there are two such nodes per TU in a TMX file.
+
+Each such node has two types of metadata:
+
+- "standardized" metadata (see e.g. https://www.gala-global.org/tmx-14b), which
+  is encoded in XML attributes attached to the node;
+
+- user-provided metadata, which is not standardized, and is encoded as a series
+  of "prop" sub-nodes, each such sub-node having a single attribute, "type",
+  which encodes the name of the metadata.
+
+As the TMX files provided by the ILSP-FC crawler are encoded in the TMX 1.4b
+format, the crawler_tmxbuilder tool will use the same format.
+
+Thus, the attributes will be the same as those provided by the ILSP-FC, whereas
+the "prop" sub-nodes will be slightly different.
+
+In this note we will list, for each type of node in the TMX structure, the
+attributes and the "prop" elements.
+
+1. The TMX node has only one attribute, "version": string ("1.4b") and two
+   sub-elements, "header" and "body". The latter has no attribute and holds the
+   TU nodes. The former holds the "standardized" attributes and the "prop"
+   sub-elements.
+
+   The standardized attributes of the "header" node are:
+
+   - "adminlang": ISO-639-1 language code (two characters)
+
+   - "creationdate": date-time in the format "YYYY-mm-ddTH:M:s+TZ"
+
+   - "creationtool": string
+
+   - "creationtoolversion": string
+
+   - "datatype": string, MIME data type ("plaintext" in this case)
+
+   - "o-tmf": string
+
+   - "segtype": string ("1:1" in our case)
+
+   - "srclang": ISO-639-1 language code (two characters)
+
+   The "prop" elements' types of the "header" node are:
+
+   - "distributor": string ("ELRC" in our case?)
+
+   - "description": string
+
+   - "availability": string ("Yes" / "No" / "Unknown")
+
+   - "l1", "l2": ISO-639-1 language codes
+
+   - "lengthInTUs": integer
+
+   - "nbWordsInL1", "nbWordsInL2": integers
+
+   - "nbOfUniqWordsInL1", "nbOfUniqWordsInL2": integers.
+
+   - "crawledSite": string
+
+   - "DSI": string ("ECulture", "EHealth", "EProcurement", "EJustice", "Online
+     Dispute Resolution", Open Data Portal, "Safer Internet", "EESSI",
+     "Other", "Not Applicable")
+
+   The "body" node doesn't have any attribute; it contains the TU nodes.
+
+2. The TU node has a single standardized attribute, "tuid": string
+   (serialization of an integer).
+  
+   The TU node has the following "prop" elements:
+
+   - "manuallyChecked": string ("true" / "false")
+
+   - "freeTranslation": string ("Yes" / "No" / "Unknown")
+
+   - "info": string (as provided by the ILSP-FC crawler)
+
+   - "type": string ("1:1")
+
+   - "alignmentErrorRatio": string (Unlikely / Likely / Undetermined)
+
+   - "tokenizationErrorRatio": string (Unlikely / Likely / Undetermined)
+
+   - "translationErrorRatio": string (Unlikely / Likely / Undetermined)
+
+   - "languageIdentificationErrorRatio": string (Unlikely / Likely / Undetermined)
+
+   - "machineTranslatedTextRatio": string (Unlikely / Likely / Undetermined).
+
+   The Unlikely annotation is chosen if the relevant error type ratio is
+   strictly below the lower threshold.
+   The Likely annotation is chosen if the relevant error type ratio is above or
+   equal to the lower threshold, but strictly below the upper threshold.
+   If the relevant error type ratio is strictly above the upper threshold, then
+   all TUs coming from tthe relevant web site are discarded.
+   If either one or both thresholds are not specified, or the web site has not
+   been sampled and manually validated, then the relevant error type annotation
+   is Undetermined. If the site has not been sampled and manually validated,
+   then all error type annotations are Undetermined.
+
+   The TU node also contains two TUV nodes.
+
+3. The TUV node has a single attribute, "xml:lang": ISO-639-1 language code.
+
+   This node has the following "prop" elements:
+
+   - "tokenCount": integer
+
+   - "site": string holding the web site the TUV came from.
+
+OPTIONS
+-------
+
+*--source-language*::
+    Source language ISO-639-1 code
+
+*--target-language*::
+    Target language ISO-639-1 code
+
+*-rf*::
+    Full report CSV file with the annotated TUs
+
+*[--crawled-web-site]*::
+    Optional crawled web site
+
+*[--lower-threshold-alignment-error]*::
+    Lower threshold for the alignment error
+
+*[--lower-threshold-language-identification-error]*::
+    Lower threshold for the language identification error
+
+*[--lower-threshold-machine-translation]*::
+    Lower threshold for the machine translations
+
+*[--lower-threshold-tokenization-error]*::
+    Lower threshold for the tokenization error
+
+*[--lower-threshold-translation-error]*::
+    Lower threshold for the translation error
+
+*[--upper-threshold-alignment-error]*::
+    Upper threshold for the alignment error
+
+*[--upper-threshold-language-identification-error]*::
+    Upper threshold for the language identification error
+
+*[--upper-threshold-machine-translation]*::
+    Upper threshold for the machine translations
+
+*[--upper-threshold-tokenization-error]*::
+    Upper threshold for the tokenization error
+
+*[--upper-threshold-translation-error]*::
+    Upper threshold for the translation error
+
+*[-d]*::
+    Delimiter for the reports CSV files (';' by default)
+
+*[-of]*::
+    Optional output TMX file.  If not specified, TMX saved in
+    output_data_source_language-target_language_crawled_site.tmx
+
+*-version*::
+    Print the version of this build and exit.
+
+*-help,--help,-?*::
+    Print this help text and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Failure (especially read IO error, or ill-formed input data errors).
+
+AUTHOR
+------
+crawler_tmxbuilder was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.

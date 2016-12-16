@@ -1,0 +1,35 @@
+OASISFormat: 0.4
+Name:        crawler_tmxbuilder
+Version:     1.1.1
+Synopsis:    ELDA CEF/ELRC ILSP-FC TMX builder
+Description:
+  ELDA ILSP-FC crawling results TMX builder, developed in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2016 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_tmxbuilder
+  Path:           .
+  Install:        false
+  MainIs:         crawler_tmxbuilder.ml
+  CompiledObject: native
+  BuildDepends:
+    csv,
+    threads,
+    core,
+    re2,
+    ppx_jane,
+    xml-light
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_tmxbuilder
+  Title: API reference for crawler_tmxbuilder
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_tmxbuilder
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"
