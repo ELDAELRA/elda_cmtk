@@ -51,7 +51,7 @@ depends: [
   "pcre" {build}
   "postgresql" {build}
   "ppx_jane" {build}
-  "re.glob" {build}
+  "re" {build}
   "re2" {build}
   "xml-light" {build}
 ]
