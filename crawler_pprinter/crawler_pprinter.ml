@@ -174,12 +174,10 @@ end = struct
                                   Some (indexes_from_selection cols')
       | None, Some cols' -> None, Some (indexes_from_selection cols')
       | Some rows', None -> Some (indexes_from_selection rows'), None in
-    let data = 
-      Csv.load ~separator input_file_name 
-      |> prune_data ~rows ~cols in
-    let ids = ids_from_data data in
+    let full_data = Csv.load ~separator input_file_name in
+    let ids = ids_from_data full_data in
     pretty_print_data ~seplines ~linesep ~ids ~concatenate_first_lines
-      ~fieldsep: separator data
+      ~fieldsep: separator (prune_data ~rows ~cols full_data)
 end
 
 
