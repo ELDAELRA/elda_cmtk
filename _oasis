@@ -80,6 +80,7 @@ Executable crawler_filter
     oml,
     camomile,
     pcre,
+    str,
     threads,
     core,
     ppx_jane,
