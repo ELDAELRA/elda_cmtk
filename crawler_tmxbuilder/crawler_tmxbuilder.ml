@@ -166,6 +166,18 @@ The following algorithm will be run:
 open Core.Std
 open Re2.Std
 
+(** Extend Core.Std.List with index function à la Python. *)
+module List : sig
+  include module type of List
+  val index: 'a list -> 'a -> int option
+end = struct
+  include List
+  let index my_list element =
+    List.filter_mapi my_list ~f: (
+      fun i el -> if el = element then Some i else None)
+    |> List.hd
+end
+
 module Crawler_tmxbuilder : sig
   type language_t = [
     | `Bg
@@ -205,7 +217,9 @@ module Crawler_tmxbuilder : sig
     ?th_inf_language_identification_error: float option ->
     ?th_sup_language_identification_error: float option ->
     ?th_inf_machine_translated_text: float option ->
-    ?th_sup_machine_translated_text: float option -> unit -> unit
+    ?th_sup_machine_translated_text: float option ->
+    ?th_inf_character_formatting_error: float option ->
+    ?th_sup_character_formatting_error: float option -> unit -> unit
 end = struct
 
   type trivalent_t =
@@ -214,6 +228,7 @@ end = struct
     | Unknown [@@deriving sexp]
 
   type error_type_t =
+    | Character_formatting_error
     | Free_translation
     | Alignment_error
     | Tokenization_error
@@ -274,7 +289,7 @@ end = struct
 
   type tu_header_t = {
     manually_checked: bool; free_translation: trivalent_t; tuid: int;
-    error: error_type_t option; further_information: string;
+    errors: error_type_t list; further_information: string;
     summary: (error_type_t * error_status_t) list} [@@deriving sexp]
 
   type tu_t = tu_header_t * tuv_t list
@@ -316,7 +331,7 @@ end = struct
     | Free_translation of trivalent_t
     | Token_count of int
     | Site of string
-    | Errors of (error_type_t * error_status_t) [@@deriving sexp]
+    | Errors of (error_type_t * error_status_t) list [@@deriving sexp]
 
   type _ proptype_set_t =
     | Tmx: tmx_t -> tmx_t proptype_set_t
@@ -330,12 +345,13 @@ end = struct
     |> String.concat
 
   let proptype_t_to_xml value =
-    let ptype, pval =
+    let ptypes_vals =
       match value with
-      | Errors (error_type, error_status) ->
+      | Errors errors -> List.map errors ~f: (
+        fun (error_type, error_status) ->
           sexp_of_error_type_t error_type |> Sexp.to_string |> lower_camel_case
           |> Printf.sprintf "%ss",
-          sexp_of_error_status_t error_status |> Sexp.to_string
+          sexp_of_error_status_t error_status |> Sexp.to_string)
       | _ ->
           let ptype', pval' =
             String.slice (sexp_of_proptype_t value
@@ -349,9 +365,11 @@ end = struct
             String.substr_replace_all pval' ~pattern: "\"" ~with_: ""
             |> Re2.rewrite_exn (Re2.create_exn {|[()]|}) ~template: ""
           in
-          ptype'', pval''
+          (ptype'', pval'') :: []
     in
-    Xml.Element ("prop", ["type", ptype], [Xml.PCData pval])
+    List.map ptypes_vals ~f: (
+      fun (ptype, pval) ->
+        Xml.Element ("prop", ["type", ptype], [Xml.PCData pval]))
 
   let proptypes_from_node: type p. p proptype_set_t -> proptype_t list = function
     | Tmx (header, _) ->
@@ -374,8 +392,7 @@ end = struct
           | {manually_checked; free_translation; further_information; summary;
              _} -> [Manually_checked manually_checked;
                     Free_translation free_translation;
-                    Info further_information] @
-                   List.map summary ~f: (fun err -> Errors err)
+                    Info further_information; Errors summary]
         end
     | Tuv (header, _) ->
         begin
@@ -489,19 +506,24 @@ end = struct
                         | s_site :: [] -> s_site, s_site
                         | _ -> "", ""
                       end in
-                    let error =
-                      let error' =
-                        try
-                          List.last_exn finfo_bits |> Sexp.of_string
-                          |> error_type_t_of_sexp |> Some
-                        with
-                        | Sexplib.Conv.Of_sexp_error _ -> None in
-                      match error' with
-                      | Some Free_translation -> None
-                      | _ -> error' in
+                    let errors =
+                      match List.index finfo_bits "manually_checked" with
+                      | None -> []
+                      | Some index ->
+                          let finfo_len = List.length finfo_bits in
+                          List.slice finfo_bits (index + 1) finfo_len
+                          |> List.filter ~f: (
+                            fun err_string ->
+                              let err_sexp = Sexp.of_string err_string in
+                              try
+                                error_type_t_of_sexp err_sexp <> Free_translation
+                              with
+                              | Sexplib.Conv.Of_sexp_error _ -> false)
+                          |> List.map ~f: (
+                              Fn.compose error_type_t_of_sexp Sexp.of_string) in
                     Some ({manually_checked; tuid = i + 1; free_translation;
                            summary = [];
-                           further_information; error}, 
+                           further_information; errors},
                            [{language = s_lang |> String.capitalize |>
                                         Sexp.of_string |> language_t_of_sexp;
                              token_count = Int.of_string s_tok_count;
@@ -520,7 +542,8 @@ end = struct
         function
           | {manually_checked; _}, _ -> manually_checked = true) in
     let errorn_tus =
-      List.count checked_tus ~f: (function | {error; _}, _ -> error = error_type)
+      List.count checked_tus ~f: (function | {errors; _}, _ ->
+        List.exists errors ~f: (fun error -> Some error = error_type))
     in
     (errorn_tus |> Float.of_int) /.
     (List.length checked_tus |> Float.of_int)
@@ -534,10 +557,6 @@ end = struct
     | _ when ratio = 0. -> Unlikely
     | _ -> Undetermined
 
-
-  let make_threshold th =
-    let float_intv = Interval.Float.create 0. 1. in
-    if Interval.Float.contains float_intv th then Some th else None
 
   let enrich_and_prune_tus ~ths_inf ~ths_sup tus =
     let aggregs =
@@ -572,7 +591,7 @@ end = struct
           | tu_hd, tu -> {tu_hd with summary = error_statuses}, tu)
       |> List.filter ~f: (
         function
-          | {error; _}, _ when error <> None -> false
+          | {errors; _}, _ when errors <> [] -> false
           | {summary: _}, _ when List.exists summary ~f: (
             function
               | _, Very_likely -> true
@@ -632,6 +651,8 @@ end = struct
              ?(th_sup_language_identification_error=None)
              ?(th_inf_machine_translated_text=None)
              ?(th_sup_machine_translated_text=None)
+             ?(th_inf_character_formatting_error=None)
+             ?(th_sup_character_formatting_error=None)
              () =
     let data =
       extract_tus ~delimiter ~source_language ~target_language ~crawled_site
@@ -642,23 +663,30 @@ end = struct
                    (Tokenization_error, th_inf_tokenization_error);
                    (Language_identification_error,
                     th_inf_language_identification_error);
-                   (Machine_translated_text, th_inf_machine_translated_text)]
+                   (Machine_translated_text, th_inf_machine_translated_text);
+                   (Character_formatting_error,
+                    th_inf_character_formatting_error)]
         ~ths_sup: [(Alignment_error, th_sup_alignment_error);
                    (Translation_error, th_sup_translation_error);
                    (Tokenization_error, th_sup_tokenization_error);
                    (Language_identification_error,
                     th_sup_language_identification_error);
-                   (Machine_translated_text, th_sup_machine_translated_text)] in
+                   (Machine_translated_text, th_sup_machine_translated_text);
+                   (Character_formatting_error,
+                   th_sup_character_formatting_error)] in
     let tu_children =
       List.map data ~f:(fun tu ->
         let tu_attrs = attributes_from_node (Tu tu) in
         let tu_props = proptypes_from_node (Tu tu) in
-        let prop_xmls = List.map tu_props ~f: proptype_t_to_xml in
+        let prop_xmls =
+          List.map tu_props ~f: proptype_t_to_xml
+          |> List.concat in
         let _, tuvs = tu in
         let tuvs_xml = List.map tuvs ~f: (fun tuv ->
           let tuv_attrs = attributes_from_node (Tuv tuv) in
           let tuv_props =
-            List.map (proptypes_from_node (Tuv tuv)) ~f: (proptype_t_to_xml) in
+            List.map (proptypes_from_node (Tuv tuv)) ~f: (proptype_t_to_xml)
+            |> List.concat in
           let _, texts = tuv in
           element_to_xml ~element:"tuv" tuv_attrs
             ~children: (tuv_props @
@@ -674,7 +702,9 @@ end = struct
         ~crawled_site in
     let tmx_attrs = attributes_from_node (Tmx (tmx, [])) in
     let tmx_props =
-      proptypes_from_node (Tmx (tmx, [])) |> List.map ~f: proptype_t_to_xml in
+      proptypes_from_node (Tmx (tmx, []))
+      |> List.map ~f: proptype_t_to_xml
+      |> List.concat in
     let whole_tmx =
       element_to_xml
         ~element: "tmx"
@@ -727,6 +757,10 @@ let command =
         ~doc: " Lower threshold for the machine translations"
       +> flag "--upper-threshold-machine-translation" (optional float)
         ~doc: " Upper threshold for the machine translations"
+      +> flag "--lower-threshold-character-formatting-error" (optional float)
+        ~doc: " Lower threshold for the character formatting errors"
+      +> flag "--upper-threshold-character-formatting-error" (optional float)
+        ~doc: " Upper threshold for the character formatting errors"
     )
     (fun delimiter' source_language' target_language' crawled_site
          input_filename
@@ -735,7 +769,8 @@ let command =
          th_inf_translation_error th_sup_translation_error
          th_inf_language_identification_error
          th_sup_language_identification_error
-         th_inf_machine_translated_text th_sup_machine_translated_text ->
+         th_inf_machine_translated_text th_sup_machine_translated_text
+         th_inf_character_formatting_error th_sup_character_formatting_error ->
       let delimiter = Char.of_string delimiter' in
       let output_filename =
         match output_filename' with
@@ -763,6 +798,7 @@ let command =
         ~th_sup_tokenization_error ~th_inf_language_identification_error
         ~th_sup_language_identification_error
         ~th_inf_machine_translated_text ~th_sup_machine_translated_text
+        ~th_inf_character_formatting_error ~th_sup_character_formatting_error
       )
 
 let () = Command.run ~version: "1.1.1" ~build_info: "ELDA on Debian" command
