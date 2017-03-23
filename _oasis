@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        elda_cmtk
-Version:     1.1.1
+Version:     1.3.0
 Synopsis:    ELDA CEF/ELRC crawling management toolkit
 Description: 
   ELDA tools for managing the crawling process
