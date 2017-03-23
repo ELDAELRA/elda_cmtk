@@ -94,10 +94,10 @@ end = struct
                                       filename))
 
   (** Helper to make root URL for directory and file creation purposes.
-   * Algorithm: Drop http[s]:// and trailing /. Replace remaining / with _.
-   * *)
+   * Algorithm: Drop http[s]:// and trailing /. Replace remaining / and : with
+   * _. *)
   let make_root_url url =
-    Str.global_replace (Str.regexp {|/|}) "__" (Str.split
+    Str.global_replace (Str.regexp {|[/:]|}) "__" (Str.split
                                                   (Str.regexp {|https?:?/*\|/$|}) url |> List.hd_exn)
 
 
