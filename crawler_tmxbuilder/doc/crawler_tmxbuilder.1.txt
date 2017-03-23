@@ -23,7 +23,7 @@ The crawler_tmxbuilder-based processing involves two stages:
 2. Generate TMX files with appropriate metadata. For each site and language
    pair, one TMX file is created.
 
-Point 1 is tackled based on the ratios of the following five issue types:
+Point 1 is tackled based on the ratios of the following six issue types:
 
 - Alignment Error
 
@@ -33,25 +33,27 @@ Point 1 is tackled based on the ratios of the following five issue types:
 
 - Translation error
 
-- Machine translated text.
+- Machine translated text
 
-For each of these five issue types, two thresholds are user-specified: an
+- Character formatting error.
+
+For each of these six issue types, two thresholds are user-specified: an
 inferior threshold (th_inf) and a superior threshold (th_sup). These thresholds
 are expressed as percentages of the total number of manually-checked TUs
 associated to a site and a language pair which have the error.
 
 Three possibilities exist:
 
-1. all of the above five error types' ratios are below the inferior threshold
+1. all of the above six error types' ratios are below the inferior threshold
    th_inf.  Then, only the TUs containing the errors are discarded and, for all
    errors, an "Unlikely" annotation is added at each TU level for each error
    type.
 
-2. Any of the above five error types'ratios is above the superior threshold
+2. Any of the above six error types' ratios is above the superior threshold
    th_sup.  Then, no sampling information is provided and all TUs from that site
    are discarded.
 
-3. Any of the above five error types' ratios is above th_inf and below th_sup,
+3. Any of the above six error types' ratios is above th_inf and below th_sup,
    and no other error type's ratio is above th_sup. Then, only the TUs
    containing the errors are discarded and for the other TUs associated to the
    same site and language pair sampling information is provided (see the
@@ -86,8 +88,8 @@ format, the crawler_tmxbuilder tool will use the same format.
 Thus, the attributes will be the same as those provided by the ILSP-FC, whereas
 the "prop" sub-nodes will be slightly different.
 
-In this note we will list, for each type of node in the TMX structure, the
-attributes and the "prop" elements.
+We list below, for each type of node in the TMX structure, the attributes and
+the "prop" elements.
 
 1. The TMX node has only one attribute, "version": string ("1.4b") and two
    sub-elements, "header" and "body". The latter has no attribute and holds the
@@ -149,22 +151,25 @@ attributes and the "prop" elements.
 
    - "type": string ("1:1")
 
-   - "alignmentErrorRatio": string (Unlikely / Likely / Undetermined)
+   - "alignmentErrors": string (Unlikely / Likely / Undetermined)
 
-   - "tokenizationErrorRatio": string (Unlikely / Likely / Undetermined)
+   - "tokenizationErrors": string (Unlikely / Likely / Undetermined)
 
-   - "translationErrorRatio": string (Unlikely / Likely / Undetermined)
+   - "translationErrors": string (Unlikely / Likely / Undetermined)
 
-   - "languageIdentificationErrorRatio": string (Unlikely / Likely / Undetermined)
+   - "languageIdentificationErrors": string (Unlikely / Likely / Undetermined)
 
-   - "machineTranslatedTextRatio": string (Unlikely / Likely / Undetermined).
+   - "machineTranslatedTexts": string (Unlikely / Likely / Undetermined)
+
+   - "characterFormattingErrors": string (Unlikely / Likely / Undetermined).
+
 
    The Unlikely annotation is chosen if the relevant error type ratio is
    strictly below the lower threshold.
    The Likely annotation is chosen if the relevant error type ratio is above or
    equal to the lower threshold, but strictly below the upper threshold.
    If the relevant error type ratio is strictly above the upper threshold, then
-   all TUs coming from tthe relevant web site are discarded.
+   all TUs coming from the relevant web site are discarded.
    If either one or both thresholds are not specified, or the web site has not
    been sampled and manually validated, then the relevant error type annotation
    is Undetermined. If the site has not been sampled and manually validated,
@@ -195,6 +200,9 @@ OPTIONS
 *[--crawled-web-site]*::
     Optional crawled web site
 
+*[--lower-threshold-character-formatting-error]*::
+    Lower threshold for the character formatting error
+
 *[--lower-threshold-alignment-error]*::
     Lower threshold for the alignment error
 
@@ -209,6 +217,9 @@ OPTIONS
 
 *[--lower-threshold-translation-error]*::
     Lower threshold for the translation error
+
+*[--upper-threshold-character-formatting-error]*::
+    Upper threshold for the character formatting error
 
 *[--upper-threshold-alignment-error]*::
     Upper threshold for the alignment error
