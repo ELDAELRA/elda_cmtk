@@ -1,0 +1,34 @@
+OASISFormat: 0.4
+Name:        crawler_localserver
+Version:     1.1.1
+Synopsis:    ELDA_CMTK local document web server
+Description:
+  ELDA local document web server developed in the ELDA CMTK toolkit, in the CEF/ELRC project.
+Authors:     Vladimir Popescu
+Maintainers: Vladimir Popescu <vladimir@elda.org>
+Copyrights:  (C) 2017 ELDA
+LicenseFile: LICENSE
+License:     GPL
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, ocamldoc, make, awk
+
+Executable crawler_localserver
+  Path:           .
+  Install:        false
+  MainIs:         crawler_localserver.ml
+  CompiledObject: native
+  BuildDepends:
+    threads,
+    core,
+    async,
+    cohttp.async,
+    tyxml.ppx
+
+AlphaFeatures: ocamlbuild_more_args
+Document crawler_localserver
+  Title: API reference for crawler_localserver
+  Type:  Ocamlbuild (0.4)
+  XOcamlbuildPath: .
+  XOCamlbuildModules: Crawler_localserver
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"

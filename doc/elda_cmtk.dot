@@ -7,6 +7,7 @@ digraph {
 
     human[shape="circle", label="웃"];
     urls[shape="box", style=rounded, label="{Input URLs}"];
+    docdir[shape="box", style=rounded, label="{Local documents}"];
     tmxs[shape="box", style=rounded, label="{TMX files}"];
     tmxs_dedup[shape="box", style=rounded, label="{Deduplicated TMXs}"];
     tmxs_deback[shape="box", style=rounded, label="{De-backed-up TMXs}"];
@@ -14,14 +15,12 @@ digraph {
     syntheses[shape="box", style=rounded, label="{Synthesis reports}"];
     syntheses_db[shape="box", style=rounded, label="{Synthesis database}"];
     syntheses_q[shape="box", style=rounded, label="{Queried synthesis reports}"];
-    syntheses_m[shape="box", style=rounded, label="{Merged synthesis reports}"];
     syntheses_filtered[shape="box", style=rounded, label="{Filtered synthesis reports}"];
     fulls[shape="box", style=rounded, label="{Full reports}"];
     fulls_db[shape="box", style=rounded, label="{Full database}"];
     fulls_filtered[shape="box", style=rounded, label="{Filtered full reports}"];
     fulls_sampled[shape="box", style=rounded, label="{Sampled full reports}"];
     fulls_q[shape="box", style=rounded, label="{Queried full reports}"];
-    fulls_m[shape="box", style=rounded, label="{Merged full reports}"];
     fulls_pp[shape="box", style=rounded, label="{Pretty-printed full reports}"];
     uniqurls[shape="box", style=rounded, label="{Unique TU-providing URLs}"];
     site_aggregs[shape="box", style=rounded, label="{Per-site aggregations}"];
@@ -50,9 +49,11 @@ digraph {
     pgloader[shape="ellipse", fillcolor=grey, style=filled, label="pgloader"];
     qcintegrator[shape="box", style="", label="crawler_qcintegrator"];
     tmxbuilder[shape="box", style="", label="crawler_tmxbuilder"];
+    localserver[shape="box", style="", label="crawler_localserver"];
 
     human -> urls[label="identification"];
     urls -> launcher -> tmxs -> backuper -> zips;
+    human -> docdir -> localserver -> launcher;
     tmxs -> reporter;
     tmxs -> metacleaner -> tmxs_dedup -> reporter;
     zips -> tmxs_deback[label="웃 (unzip)"];

@@ -22,6 +22,7 @@ remove: [
     ["rm" "-f" "%{bin}%/crawler_metacleaner" "%{bin}%/crawler_plotter"]
     ["rm" "-f" "%{bin}%/crawler_pprinter" "%{bin}%/crawler_reporter"]
     ["rm" "-f" "%{bin}%/crawler_sampler" "%{bin}%/crawler_qcintegrator"]
+    ["rm" "-f" "%{bin}%/crawler_tmxbuilder" "%{bin}%/crawler_localserver"]
     ["rm" "-f" "%{man}%/man1/crawler_aggregator.1" "%{man}%/man1/crawler_backuper.1"]
     ["rm" "-f" "%{man}%/man1/crawler_dbdumper.1" "%{man}%/man1/crawler_dbretriever.1"]
     ["rm" "-f" "%{man}%/man1/crawler_filter.1" "%{man}%/man1/crawler_launcher.1"]
@@ -29,6 +30,8 @@ remove: [
     ["rm" "-f" "%{man}%/man1/crawler_pprinter.1" "%{man}%/man1/crawler_reporter.1"]
     ["rm" "-f" "%{man}%/man1/crawler_sampler.1"]
     ["rm" "-f" "%{man}%/man1/crawler_qcintegrator.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_tmxbuilder.1"]
+    ["rm" "-f" "%{man}%/man1/crawler_localserver.1"]
     ["rm" "-fr" "%{doc}%/elda_cmtk" "%{share}%/elda_cmtk"]
     ["ocamlfind" "remove" "elda_cmtk"]
 ]
@@ -54,4 +57,6 @@ depends: [
   "re" {build}
   "re2" {build}
   "xml-light" {build}
+  "cohttp" {build}
+  "tyxml-ppx" {build}
 ]

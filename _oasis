@@ -192,6 +192,19 @@ Executable crawler_tmxbuilder
     ppx_jane,
     xml-light
 
+Executable crawler_localserver
+  Path:           crawler_localserver
+  Install:        true
+  MainIs:         crawler_localserver.ml
+  CompiledObject: native
+  BuildDepends:
+    threads,
+    core,
+    async,
+    cohttp.async,
+    tyxml.ppx
+
+
 AlphaFeatures: ocamlbuild_more_args
 Document elda_cmtk
   Title: API reference for the ELDA crawler management toolkit (CMTK)
@@ -209,7 +222,8 @@ Document elda_cmtk
                       crawler_reporter/Crawler_reporter,
                       crawler_sampler/Crawler_sampler,
                       crawler_qcintegrator/Crawler_qcintegrator,
-                      crawler_tmxbuilder/Crawler_tmxbuilder
+                      crawler_tmxbuilder/Crawler_tmxbuilder,
+                      crawler_localserver/Crawler_localserver
   XOCamlbuildExtraArgs:
     "-docflags '-colorize-code -short-functors -charset utf-8'"
 
@@ -315,4 +329,12 @@ Document "crawler_tmxbuilder-man"
     Install: true
     XCustom: a2x -d manpage --format=manpage crawler_tmxbuilder/doc/crawler_tmxbuilder.1.txt && mv crawler_tmxbuilder/doc/crawler_tmxbuilder.1 $mandir/man1/
     DataFiles: crawler_tmxbuilder/doc/crawler_tmxbuilder.1
+    InstallDir: $mandir/man1
+
+Document "crawler_localserver-man"
+    Type: custom (0.4)
+    Title: Man page for crawler_localserver
+    Install: true
+    XCustom: a2x -d manpage --format=manpage crawler_localserver/doc/crawler_localserver.1.txt && mv crawler_localserver/doc/crawler_localserver.1 $mandir/man1/
+    DataFiles: crawler_localserver/doc/crawler_localserver.1
     InstallDir: $mandir/man1

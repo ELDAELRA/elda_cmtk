@@ -72,7 +72,7 @@ In order to build all tools at once, you need to:
 -   Install OCaml-specific dependencies:
 
         opam install archimedes cairo2 core core_extended ppx_jane camomile csv \
-        gsl orm oml pcre parmap postgresql xml-light async re2 re
+        gsl orm oml pcre parmap postgresql xml-light async re2 re cohttp
 
     -   `archimedes` and `cairo2` are needed for compiling the `crawler_plotter` binary.
     -   `camomile` is needed for Unicode awareness.
@@ -86,6 +86,8 @@ In order to build all tools at once, you need to:
     -   `re2` and `re` are regular expression engines. The first consists in bindings to Google's re2 engine and is provided by Jane Street Capital and follows the conventions of the `core` library. The second one provides, through the `re.glob` sub-package, UNIX name globbing capabilities.
     -   `xml-light` is needed by the `crawler_reporter` and `crawler_tmxbuilder` tool for reading, parsing and generating the XML TMX files produced by the [ILSPFFC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc) crawler.
     -   `parmap` is needed for parallel computing capabilities. It is currently used by the `crawler_launcher` and `crawler_backuper` tools.
+    -   `cohttp` is needed for serving contents over HTTP. It is currently used by the `crawler_localserver` tool.
+    -   `tyxml` and `tyxml-ppx` are needed for programmatically generating HTML documents. They are used by the `crawler_localserver` tool.
 
     Please note that several OCaml dependencies require system dependencies, which can be seen, in case of installation failure, with the `depext` tool, which should be installed first:
 

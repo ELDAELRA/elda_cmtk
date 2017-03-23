@@ -1,0 +1,74 @@
+CRAWLER_LOCALSERVER(1)
+======================
+:doctype: manpage
+
+NAME
+----
+crawler_localserver - build web site from current 
+directory contents and serve it over HTTP.
+
+SYNOPSIS
+--------
+*crawler_localserver* 'OPTIONS'
+
+DESCRIPTION
+-----------
+The crawler_localserver(1) tool scans a user-specified directory, builds an
+index HTML page containing URLs generated from the paths to the files, and
+serves the directory using the generated index page. The tool does not include
+the generated index page into the file listing.
+
+The tool takes an optional port argument for customizing the default 8000 port
+used for serving the directory contents.
+
+The execution of the tool can be terminated gracefully by a SIGINT (Ctrl-C
+pressed by the user). Upon termination, the tool deletes the generated index
+HTML page. 
+
+The tool uses the cohttp-server-async tool installed with the cohttp OPAM
+package. When cohttp-server-async is absent, crawler_localserver(1) falls back
+to python3 -m http.server. Thus, in order for crawler_localserver(1) to work
+properly, it requires either an installation of the cohttp OPAM package (which
+is a required dependency) or, if this package is missing (e.g. in case of
+standalone deployment of the executable on a different machine), a standard
+installation of Python 3 is required.
+
+OPTIONS
+-------
+*-d*::
+    Document root directory (mandatory).
+
+*-p*::
+    Port where the directory contents is supposed to be served (8000 by default).
+
+*-t*::
+    Title of the index HTML page ("Default title" by default).
+
+*-version*::
+    Print the program build version and exit.
+
+*-help,--help,-?*::
+    Print this help text and exit.
+
+EXIT STATUS
+-----------
+
+*0*::
+    Success
+
+*Exception raised*::
+    Elda_cmtk_localserver_error raised when the user-specified directory (via
+    -d) does not exist. Failure when cohttp-server-async cannot be found on the
+    path, and Python 3 cannot be found on the path either, or when the
+    user-specified port is below 1024.
+
+AUTHOR
+------
+crawler_localserver was written by Vladimir Popescu, on behalf of ELDA, the
+Evaluations and Language Resources Distribution Agency.
+
+COPYING
+-------
+Copyright \(C) 2017 ELDA. All rights reserved. Distributed under the terms of
+the GNU General Public License version 3, accessible at
+<http://www.gnu.org/licenses/.
