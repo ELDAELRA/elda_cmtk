@@ -4,7 +4,7 @@ Installation and Deployment Instructions
 Introduction
 ------------
 
-The ELDA Crawling Data Management Toolkit ("ELDA-CMTK") is written in [OCaml](http://ocaml.org) 4.03. In this document we present all details needed to compile and install the tools on a crawling machine.
+The ELDA Crawling Data Management Toolkit ("ELDA-CMTK") is written in [OCaml](http://ocaml.org) 4.03 and beyond. In this document we present all details needed to compile and install the tools on a crawling machine.
 
 These notes assume a Linux [Debian](https://www.debian.org/)-derived distribution, such as Debian itself (Jessie and beyond), [Ubuntu](http://www.ubuntu.com/), [Mint](https://www.linuxmint.com/), etc, but should be applicable, with minor modifications, to other Linux / UNIX-based distributions as well.
 
