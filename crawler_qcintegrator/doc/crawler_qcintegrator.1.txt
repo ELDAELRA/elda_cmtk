@@ -28,6 +28,9 @@ This tool uses the following data sources
   source text
   target text
   #error annotation
+  #error annotation
+  ...
+  #error annotation
 
   The 'alignment score' and 'further information' values are extracted from the
   "Alignment score" and "Further information" columns in the CSV holding the
@@ -49,13 +52,13 @@ Each TU in the full TUs database is tagged based on the following criteria:
 - if a #sampled TU has been manually checked, then the #manually_checked tag is
 appended to the "Further information" field.
 
-- if a #sampled#manually_checked TU has been marked with one of the issues
-  among
+- if a #sampled#manually_checked TU has been marked with one or several of the
+  issues among
 
   #F: Free_translation; #A: Alignment_error; #L: Language_identification_error;
   #E: Translation_error; #T: Tokenization_error; #MT: Machine_translated_text,
-  ??: Unspecified_error,
-  the sharp sign '#' and the relevant tag description, e.g. #Alignment_error,
+  #C: Character_formatting_error, ??: Unspecified_error,
+  the sharp sign '#' and the relevant tag descriptions, e.g. #Alignment_error,
   will be appended to the "Further information" field.
 
 - if the TU is not #sampled, then nothing is appended to the "Further
@@ -65,9 +68,18 @@ Thus, the crawler_qcintegrator(1) tool will enrich the "Further information"
 field with, at the minimum, nothing, and, at the maximum, a structure like::
 
     different numbers in TUVs#psi_'Yes|No|Unclear|Unknown'#sampled
-    #manually_checked#'Free_translation|Alignment_error|
+    #manually_checked(#'Free_translation|Alignment_error|
     Language_identification_error|Translation_error|Tokenization_error|
-    Machine_translated_text|Unspecified_error'.
+    Machine_translated_text|Unspecified_error|Character_formatting_error'*)
+
+where '*' denotes zero or more occurrences of the errors.
+
+In order to deal with legacy annotation files, the user can specify whether
+one wishes to do so, via the --legacy-annotations option and, if it is set, the
+user can further specify if either one or both alignment score and further
+information fields have been ignored when exporting the data to the manual
+annotation format (via crawler_pprinter), by adding either one or both options
+--no-alignment-score and --no-further-information.
 
 OPTIONS
 -------
@@ -81,6 +93,17 @@ OPTIONS
 
 *-sd*::
     Directory holding the text files with the human-validated samples.
+
+*--legacy-annotations*::
+    Treat annotations as legacy, i.e. do not use all fields in computing TU
+    identifiers: use only alignment score, further information, source text and
+    target text.
+
+*--no-alignment-score*::
+    Do not use the alignment score field in computing the TU identifier.
+
+*--no-further-information*::
+    Do not use the further information field in computing the TU identifier.
 
 *-d*::
     Delimiter for the reports CSV files.
@@ -112,6 +135,6 @@ Evaluations and Language Resources Distribution Agency.
 
 COPYING
 -------
-Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+Copyright \(C) 2017 ELDA. All rights reserved. Distributed under the terms of
 the GNU General Public License version 3, accessible at
 <http://www.gnu.org/licenses/.
