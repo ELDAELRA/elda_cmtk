@@ -92,6 +92,7 @@
 
 *)
 open Core.Std
+open Re2.Std
 
 (** Generic updatable Index type. *)
 module type Index_t = sig
@@ -122,11 +123,15 @@ end
 
 (** Main module. *)
 module Crawler_qcintegrator : sig 
-  val manage_tus: ?delimiter: char -> tu_file: string -> sample_dir: string ->
-    psi_file: string -> out_file: string -> unit -> unit
+  val manage_tus: ?delimiter: char -> ?legacy_annotations: bool ->
+                  ?no_alignment_score: bool ->
+                  ?no_further_information: bool -> tu_file: string ->
+                  sample_dir: string -> psi_file: string -> out_file: string ->
+                  unit -> unit
 end = struct
   (** Manually-annotated error type. *)
   type error_t =
+    | Character_formatting_error
     | Unspecified_error
     | Alignment_error
     | Free_translation
@@ -136,14 +141,14 @@ end = struct
     | Machine_translated_text [@@deriving sexp]
 
   type qc_entry_t = {id: string; source_text: string; target_text: string;
-                     alignment_score: float; error: error_t option}
+                     alignment_score: float option; error: error_t list option}
 
   (** Error annotation parser. *)
   let error_of_string in_string =
-    let open Re2.Std in
     match Re2.(find_first_exn (create_exn {|#(\S{1,2})|}) in_string
                |> split ~include_matches: true (create_exn {|#|}))
           |> List.tl_exn with
+    | "#" :: "C" :: [] -> Character_formatting_error
     | "#" :: "A" :: [] -> Alignment_error
     | "#" :: "F" :: [] -> Free_translation
     | "#" :: "L" :: [] -> Language_identification_error
@@ -160,7 +165,6 @@ end = struct
 
   (** Helper to index all manually-sampled and quality-controlled data. *)
   let build_samples_index ~input_dir =
-    let open Re2.Std in
     let files_list = Sys.ls_dir input_dir
     |> List.filter ~f: (fun file -> Filename.check_suffix file ".txt" &&
                                     Filename.concat input_dir file
@@ -172,7 +176,7 @@ end = struct
       |> List.group ~break: (
         fun line ->
           Re2.matches (Re2.create_exn
-                        {|^\[\S{32,32};\s([0-9]\.[0-9]+|\-)(;\s)?.*\]$|}))
+                        {|^\[\S{32,32}(;\s([0-9]{1,2}\.[0-9]+|\-))?(;\s)?.*\]$|}))
       |> List.tl_exn) (Parmap.L files_list)
     |> List.concat
     |> List.filter_map ~f: (fun entry ->
@@ -181,21 +185,24 @@ end = struct
             let error =
               match error' with
               | [] -> None
-              | _ -> Some (List.hd_exn error' |> error_of_string) in
+              | _ -> Some (List.map error' ~f: error_of_string) in
             begin
               match Re2.(rewrite_exn (create_exn {|[\[\]]|}) ~template: "" header
                          |> split (create_exn {|; |})) with
-              | id :: alignment_score :: _ ->
+              | id :: alignment_score :: _ :: [] ->
                   begin
                     try
                       Some {id; source_text; target_text; error;
-                            alignment_score = Float.of_string alignment_score}
+                            alignment_score =
+                              Float.of_string alignment_score |> Some}
                     with (* The "-" case (for repetitions) *)
                     | Invalid_argument _ -> None
                   end
-              | _ :: [] | [] -> None
+              | id :: [] -> if source_text = "-" && target_text = "-" then None
+                            else Some {id; source_text; target_text; error;
+                                       alignment_score = None}
+              | _ -> None
             end
-
         | _ -> None
        )
 
@@ -206,10 +213,13 @@ end = struct
                source_language: string; target_text: string;
                target_token_count: int; target_language: string;
                alignment_score: float; further_information: string;
-               id: string; id_stripped: string}
+               id: string}
 
   (** Helper to parse TU entry as yielded by the CSV file reader. *)
-  let parse_tu_entry ~delimiter entry =
+  let parse_tu_entry ~delimiter
+                     ?(legacy_annotations=false)
+                     ?(no_alignment_score=false)
+                     ?(no_further_information=false) entry =
     let make_id bits =
       String.concat ~sep: (String.escaped "☯") bits
       |> Digest.string |> Digest.to_hex in
@@ -217,19 +227,26 @@ end = struct
     | crawled_site :: original_sites :: provenance :: source_text ::
       source_token_count :: source_language :: target_text :: target_token_count
       :: target_language :: alignment_score :: further_information :: []
-        -> Some {crawled_site;
-                 original_sites = String.split ~on: ';' original_sites;
-                 provenance; source_text;
-                 source_token_count = Int.of_string source_token_count;
-                 source_language; target_text;
-                 target_token_count = Int.of_string target_token_count;
-                 target_language;
-                 alignment_score = Float.of_string alignment_score;
-                 further_information;
-                 id = make_id [alignment_score; further_information; source_text;
-                               target_text];
-                 id_stripped = make_id [alignment_score; source_text;
-                                        target_text]}
+      -> let seed_id_elements =
+          match legacy_annotations, no_alignment_score,
+                no_further_information with
+          | true, true, true -> [source_text; target_text]
+          | true, true, false -> [further_information; source_text; target_text]
+          | true, false, true -> [alignment_score; source_text; target_text]
+          | true, false, false -> [alignment_score; further_information;
+                                   source_text; target_text]
+          | false, _, _ -> entry
+         in
+         Some {crawled_site;
+               original_sites = String.split ~on: ';' original_sites;
+               provenance; source_text;
+               source_token_count = Int.of_string source_token_count;
+               source_language; target_text;
+               target_token_count = Int.of_string target_token_count;
+               target_language;
+               alignment_score = Float.of_string alignment_score;
+               further_information;
+               id = make_id seed_id_elements}
     | _ -> None
 
   (** The Unknown type is basically for not-yet-handled sites. *)
@@ -239,13 +256,13 @@ end = struct
     | Unclear
     | Unknown [@@deriving sexp]
 
-  (** Helper to extract site from URL, i.e. www.toto.fr from
-   * http://toto.fr/titi/tata.html*)
+  (** Helper to extract site from URL, i.e. toto.fr from
+   * http://www.toto.fr/titi/tata.html*)
   let extract_site url =
-    let open Re2.Std in
     Re2.split (Re2.create_exn {|/{2,2}|}) url
     |> List.last_exn |> Re2.split (Re2.create_exn {|/{1,1}|})
     |> List.hd_exn
+    |> Re2.(rewrite_exn (create_exn {|www\.|}) ~template: "")
 
   (** Helper to load PSI data.*)
   let load_psi_data ?(delimiter=';') ~psi_file () =
@@ -310,7 +327,6 @@ end = struct
 
   (** Helper to check if a string contains a substring. *)
   let is_substring ~substring =
-    let open Re2.Std in
     Re2.matches (Re2.create_exn (Printf.sprintf {|%s|} substring))
 
   (** Helper to annotate TUs in terms of manual quality control.*)
@@ -325,10 +341,12 @@ end = struct
             (val sampled_sites_index : Index_t with type t = string) in
           let manual_sample =
             List.filter samples_index ~f: (
-              fun samp -> (samp.id = tu.id || samp.id = tu.id_stripped) &&
+              fun samp -> samp.id = tu.id &&
                 samp.source_text = tu.source_text &&
                 samp.target_text = tu.target_text &&
-                samp.alignment_score = tu.alignment_score)
+                match samp.alignment_score with
+                | None -> true
+                | Some score -> score = tu.alignment_score)
             |> List.hd in
           begin
             match manual_sample with
@@ -345,7 +363,11 @@ end = struct
                   begin
                     match sample.error with
                     | None -> ""
-                    | Some error -> "#" ^ (sexp_of_error_t error |> Sexp.to_string)
+                    | Some errors ->
+                        "#" ^ (List.map errors
+                                ~f: (fun error ->
+                                      sexp_of_error_t error |> Sexp.to_string)
+                               |> String.concat ~sep: "#")
                   end in
                 Some {tu with further_information = tu.further_information ^ coda}
           end
@@ -354,7 +376,11 @@ end = struct
 
   (** Public function to annotate the TUs at the PSI and QC level.*)
 
-  let manage_tus ?(delimiter=';') ~tu_file ~sample_dir ~psi_file ~out_file () =
+  let manage_tus ?(delimiter=';')
+                 ?(legacy_annotations=false)
+                 ?(no_alignment_score=false)
+                 ?(no_further_information=false)
+                 ~tu_file ~sample_dir ~psi_file ~out_file () =
     let data' = 
       if Sys.file_exists_exn tu_file then
         Some (Csv.load ~separator: delimiter tu_file)
@@ -369,7 +395,8 @@ end = struct
           let psi_data = load_psi_data ~delimiter ~psi_file () in
           let out_data' =
             List.map ~f: (fun entry ->
-              parse_tu_entry ~delimiter entry
+              parse_tu_entry ~delimiter ~legacy_annotations ~no_alignment_score
+                             ~no_further_information entry
               |> handle_tu_psi ~psi_data
               |> handle_tu_qc
                 ~sampled_sites_index: (module Index : Index_t with type t = string)
@@ -405,11 +432,21 @@ let command =
   Command.basic
     ~summary: "Automatically integrate human validations and PSI validations \
               to the full TUs"
-    ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
+    ~readme: (fun () -> "=== Copyright © 2017 ELDA - All rights reserved ===\n")
     Command.Spec.(
       empty
       +> flag "-d" (optional_with_default ";" string)
         ~doc: " Delimiter for the reports CSV files"
+      +> flag "--legacy-annotations" no_arg
+        ~doc: " Treat annotations as legacy, i.e. do not use all fields in \
+                computing TU identifiers; use only alignment score, further \
+                information, source text and target text"
+      +> flag "--no-alignment-score" no_arg
+        ~doc: " Do not use the alignment score field in computing the TU \
+                identifier "
+      +> flag "--no-further-information" no_arg
+        ~doc: " Do not use the further information field in computing the TU \
+                identifier "
       +> flag "-rf" (required string)
         ~doc: " Full report CSV file with the TUs to annotate"
       +> flag "-sd" (required string)
@@ -423,7 +460,8 @@ let command =
                (if not specified, then -rf with \"annotated_\" prepended is \
                chosen)."
     )
-    (fun delimiter' tu_file sample_dir psi_file out_fname' ->
+    (fun delimiter' legacy_annotations no_alignment_score
+         no_further_information tu_file sample_dir psi_file out_fname' ->
       let open Crawler_qcintegrator in
       let out_file =
         match out_fname' with
@@ -431,7 +469,10 @@ let command =
                   Filename.basename tu_file
         | Some out_fname -> out_fname in
       manage_tus
-        ~delimiter: (Char.of_string delimiter') ~tu_file ~sample_dir ~psi_file
+        ~delimiter: (Char.of_string delimiter')
+        ~legacy_annotations
+        ~no_alignment_score ~no_further_information
+        ~tu_file ~sample_dir ~psi_file
         ~out_file
     )
 
