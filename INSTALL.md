@@ -84,7 +84,7 @@ In order to build all tools at once, you need to:
     -   `orm` is required for providing Object-Relational Mapping (ORM) capabilities to the SQLite backend of the `crawler_qcintegrator` tool.
     -   `pcre` is a more powerful regular expression engine than the standard library's `str`. Most notably, it supports look-behind and look-ahead patterns.
     -   `re2` and `re` are regular expression engines. The first consists in bindings to Google's re2 engine and is provided by Jane Street Capital and follows the conventions of the `core` library. The second one provides, through the `re.glob` sub-package, UNIX name globbing capabilities.
-    -   `xml-light` is needed by the `crawler_reporter` and `crawler_tmxbuilder` tool for reading, parsing and generating the XML TMX files produced by the [ILSPFFC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc) crawler.
+    -   `xml-light` is needed by the `crawler_reporter` and `crawler_tmxbuilder` tool for reading, parsing and generating the XML TMX files produced by the [ILSP-FC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc) crawler.
     -   `parmap` is needed for parallel computing capabilities. It is currently used by the `crawler_launcher` and `crawler_backuper` tools.
     -   `cohttp` is needed for serving contents over HTTP. It is currently used by the `crawler_localserver` tool.
     -   `tyxml` and `tyxml-ppx` are needed for programmatically generating HTML documents. They are used by the `crawler_localserver` tool.

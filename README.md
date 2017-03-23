@@ -4,13 +4,13 @@ Software Toolkit for Crawling Management
 Synopsis
 --------
 
-The ELDA Crawled Data Management Toolkit helps the users to manage the crawling process using the ILSP's Focused Crawler, [ILSPFFC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc).
+The ELDA Crawled Data Management Toolkit helps the users to manage the crawling process using the ILSP's Focused Crawler, [ILSP-FC](http://nlp.ilsp.gr/redmine/projects/ilsp-fc).
 
 The toolkit consists of a set of 14 command-line tools.
 
 The tools run on native Linux / UNIX-compatible platforms, are implemented as POSIX-like command-line tools and provide the following functionalities:
 
-1.  Manage crawling session launching, starting from a set of URLs. Thus, the dispatching of each URL to a crawling process, the creation of an associated seed URL file and crawled data directory are handled. Also, the crawling processes (via the ILSP-FC-2.2.3) are dispatched to all the CPUs of the machine, thus all crawls are run in parallel and all processes are logged. This is implemented in the `crawler_launcher` tool.
+1.  Manage crawling session launching, starting from a set of URLs. Thus, the dispatching of each URL to a crawling process, the creation of an associated seed URL file and crawled data directory are handled. Also, the crawling processes (via the ILSP-FC >= 2.2.3) are dispatched to all the CPUs of the machine, thus all crawls are run in parallel and all processes are logged. This is implemented in the `crawler_launcher` tool.
 2.  Perform crawled URL deduplication across several crawling "sessions" (i.e.) sets / batches of crawled data directories. Thus, we make sure we don't use the same crawled data several times. This is implemented in the `crawler_metacleaner` tool.
 3.  Back-up crawled results to zip files, based on user-specified file extensions (e.g. tmx, txt, html, xml). This is implemented in the `crawler_backuper` tool.
 4.  Analyze crawled data (currently, only output\_data\_l1-l2.tmx) and compile CSV-formatted reports. Currently, four reports are compiled:
