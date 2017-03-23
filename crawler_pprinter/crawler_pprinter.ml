@@ -184,7 +184,7 @@ end
 let command =
   Command.basic
     ~summary: "Pretty print reporting data"
-    ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
+    ~readme: (fun () -> "=== Copyright © 2017 ELDA - All rights reserved ===\n")
     Command.Spec.(
       empty
       +> flag "--rows" (optional string) 
