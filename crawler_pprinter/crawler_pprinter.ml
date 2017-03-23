@@ -195,8 +195,8 @@ let command =
         ~doc: " Input CSV file delimiter (; by default)"
       +> flag "--seplines" (optional_with_default true bool)
         ~doc: " Pretty print each column per line (true by default). \
-               If false, then justify column, while keeping each row on one \
-               line (not implemented yet)."
+                If false, then dump the data in the same CSV format as the \
+                input data."
       +> flag "--linesep" (optional_with_default "\n" string)
         ~doc: " Entry line separator (\\n, blank line by default)."
       +> flag "--concat-first" (optional_with_default 1 int)

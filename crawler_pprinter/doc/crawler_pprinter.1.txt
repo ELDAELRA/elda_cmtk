@@ -14,13 +14,16 @@ SYNOPSIS
 DESCRIPTION
 -----------
 The crawler_pprinter(1) tool allows to pretty-print CSV reporting data into two
-ways basically: (i) each column is printed on a different line; (ii) the CSV
+ways basically: (i) each column is printed on a different line, and the first
+line is the MD5 checksum of all the lines in the original file; (ii) the CSV
 format of the input is preserved. For (i), we can specify a number of columns to
-be printed on the same line. For both pretty-prints, the user can cherry-pick
-the rows and columns that need to be pretty-printed. The user can also specify
-the order of the rows and columns, thus enabling customizable "slices" through
-the input CSV data. The rows and columns can be specified either ordinally or
-alphabetically, individually or as ranges.
+be printed on the same line (including the MD5 checksum field). For both
+pretty-prints, the user can cherry-pick the rows and columns that need to be
+pretty-printed. The user can also specify the order of the rows and columns,
+thus enabling customizable "slices" through the input CSV data. The rows and
+columns can be specified either ordinally or alphabetically, individually or as
+ranges. For output (i), irrespective of the column order specified by the user,
+the MD5 is always printed first.
 
 OPTIONS
 -------
@@ -76,6 +79,6 @@ Evaluations and Language Resources Distribution Agency.
 
 COPYING
 -------
-Copyright \(C) 2016 ELDA. All rights reserved. Distributed under the terms of
+Copyright \(C) 2017 ELDA. All rights reserved. Distributed under the terms of
 the GNU General Public License version 3, accessible at
 <http://www.gnu.org/licenses/.
