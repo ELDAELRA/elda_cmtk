@@ -91,7 +91,7 @@
           add #sampled to the "Further Information" field.
 
 *)
-open Core.Std
+open Core
 open Re2.Std
 
 (** Generic updatable Index type. *)
@@ -113,9 +113,9 @@ module Index : Index_t with type t = string = struct
   type index_t = t list
   let _index = ref []
   let index = fun () -> !_index (* Enforce "late" binding. *)
-  let add dat = if not (List.mem !_index dat) then _index := dat :: !_index
+  let add dat = if not (List.mem !_index dat ~equal: String.equal) then _index := dat :: !_index
   let get i = List.nth_exn !_index i
-  let mem dat = List.mem !_index dat
+  let mem dat = List.mem !_index dat ~equal: String.equal
   let delete dat = _index := List.filter ~f: ((<>) dat) !_index
   let remove i = _index := List.filteri ~f: (fun i' _ -> i' <> i) !_index
   let empty = fun () -> _index := []
@@ -222,7 +222,7 @@ end = struct
                      ?(no_further_information=false) entry =
     let make_id bits =
       String.concat ~sep: (String.escaped "☯") bits
-      |> Digest.string |> Digest.to_hex in
+      |> Md5.digest_string |> Digest.to_hex in
     match entry with
     | crawled_site :: original_sites :: provenance :: source_text ::
       source_token_count :: source_language :: target_text :: target_token_count
@@ -290,7 +290,9 @@ end = struct
               | Failure _ -> Unknown in
             (site, psi_scope)
         | _ -> failwith "qcintegrator: Ill-formed PSI entry")
-      |> Set.of_list ~comparator: StrPsiComp.comparator |> Set.to_list
+      |> Set.of_list (module struct
+                        type t = string * psi_scope_t
+                        include StrPsiComp end) |> Set.to_list
     else
       failwith (Printf.sprintf "qcintegrator: The file %s does not exist"
                                psi_file)
@@ -429,7 +431,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically integrate human validations and PSI validations \
               to the full TUs"
     ~readme: (fun () -> "=== Copyright © 2017 ELDA - All rights reserved ===\n")

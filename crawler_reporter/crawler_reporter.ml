@@ -45,7 +45,7 @@
  * For the histograms and pie charts, archimedes will be used.
  * *)
 
-open Core.Std
+open Core
 
 module CrawlerUtils : sig 
   val walk: ?depth: int -> string -> string list
@@ -639,7 +639,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically gather reporting information from the crawled data"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved  ===\n")
     Command.Spec.(

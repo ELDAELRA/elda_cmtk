@@ -163,10 +163,10 @@ The following algorithm will be run:
  
 *)
 
-open Core.Std
+open Core
 open Re2.Std
 
-(** Extend Core.Std.List with index function à la Python. *)
+(** Extend Core.List with index function à la Python. *)
 module List : sig
   include module type of List
   val index: 'a list -> 'a -> int option
@@ -719,7 +719,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: " Automatically choose relevant TUs and build TMX files."
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(

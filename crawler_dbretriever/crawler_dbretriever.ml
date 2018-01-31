@@ -33,7 +33,7 @@
     from:
     https://github.com/mmottl/postgresql-ocaml/blob/master/examples/prompt.ml*)
 
-open Core.Std
+open Core
 
 module CrawlerDbretriever : sig
 
@@ -160,7 +160,7 @@ end = struct
         if print = true then
           begin
             print_res ~keep_ids conn res;
-            flush stdout;
+            Out_channel.(flush stdout);
           end;
         dump_res ~keep_ids ~print conn
       end
@@ -171,7 +171,7 @@ end = struct
     match conn#notifies with
     | Some {Notification.name; pid; extra} ->
       Printf.printf "Notication from backend %i: [%s] [%s]\n" pid name extra;
-      flush stdout;
+      Out_channel.(flush stdout);
       dump_notification conn
     | None -> ()
 
@@ -284,14 +284,18 @@ end = struct
       failwith "cannot run on Windows";
     let conn = new Postgresql.connection ~dbname ~user ~password () in
     print_conn_info conn;
-    flush stdout;
+    Out_channel.(flush stdout);
     conn#set_notice_processor 
       (fun s -> Printf.eprintf "postgresql error [%s]\n" s);
     let _ = Thread.create listener conn in
     try
       while true do
         Printf.printf "%s" "crawler_dbretriever > ";
-        let s = read_line () in
+        let s =
+          begin
+            Out_channel.(flush stdout);
+            In_channel.(input_line_exn stdin)
+          end in
         match dump_parameters_from_query s with
         | DUMP, TO, out_file_name, Unknown, "", Semicolon ->
           begin
@@ -321,7 +325,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Interact with Postgresql database and dump queried data into CSV"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(

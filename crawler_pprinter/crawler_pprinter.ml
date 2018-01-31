@@ -38,7 +38,7 @@
  * column index / number.
  *
  * *)
-open Core.Std
+open Core
 
 module CrawlerPprinter : sig
 
@@ -120,9 +120,10 @@ end = struct
     match rows, cols with
     | Some rows', Some cols' ->
       List.filter_mapi data ~f: (fun i datum -> 
-          if List.mem rows' (i + 1) then Some (sorti datum cols') else None)
+          if List.mem rows' (i + 1) ~equal: Int.equal 
+            then Some (sorti datum cols') else None)
     | Some rows', None -> List.filteri data ~f: (
-        fun i _ -> List.mem rows' (i + 1))
+        fun i _ -> List.mem rows' (i + 1) ~equal: Int.equal)
     | None, Some cols' -> List.map data ~f: (fun dat -> sorti dat cols')
     | None, None -> data
 
@@ -175,14 +176,14 @@ end = struct
       | None, Some cols' -> None, Some (indexes_from_selection cols')
       | Some rows', None -> Some (indexes_from_selection rows'), None in
     let full_data = Csv.load ~separator input_file_name in
-    let ids = ids_from_data full_data in
+    let ids = ids_from_data (prune_data ~rows ~cols full_data) in
     pretty_print_data ~seplines ~linesep ~ids ~concatenate_first_lines
       ~fieldsep: separator (prune_data ~rows ~cols full_data)
 end
 
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Pretty print reporting data"
     ~readme: (fun () -> "=== Copyright © 2017 ELDA - All rights reserved ===\n")
     Command.Spec.(

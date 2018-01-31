@@ -44,7 +44,7 @@
  * - a pretty-printed output, as an S-expression.
  * *)
 
-open Core.Std
+open Core
 
 module CrawlerSampler : sig
   val build_population_from_full_report: ?delimiter: char -> string ->
@@ -102,7 +102,8 @@ end = struct
           | _ :: orig_sites :: _ ->
             if String.split orig_sites ~on: ';'
                |> List.exists ~f: (fun orig_site ->
-                   List.mem web_sites orig_site) then true else false
+                   List.mem web_sites orig_site ~equal: String.equal)
+            then true else false
           | _ -> false
         ) in
     match language_pair with
@@ -210,7 +211,8 @@ end = struct
           fun cachel datel ->
             let indexes =
               index_population datel
-              |> List.filter ~f: (fun el -> not (List.mem cachel el)) in
+              |> List.filter ~f: (fun el -> not (List.mem cachel el
+                                                          ~equal: Int.equal)) in
             let size' = percent_of_size indexes size in
             sample indexes ~size: size'
         )
@@ -252,7 +254,8 @@ end = struct
                   fun idx_list datum_list ->
                     List.filteri datum_list ~f: (
                       fun i _ ->
-                        if List.mem idx_list (i + 1) then true else false))) in
+                        if List.mem idx_list (i + 1) ~equal: Int.equal
+                          then true else false))) in
           let output_len =
             (List.length @@ Fn.compose List.concat List.concat output_data) in
           begin
@@ -304,7 +307,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically sample TU-level reporting information"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(
@@ -351,7 +354,8 @@ let command =
            | basen', None -> basen', "csv"
            | basen', Some ext' -> basen', ext' in
          let timestamp =
-           Time.format (Time.now ()) "%d%m%Y_%Hh%Mm%Ss" ~zone: (Time.Zone.local)
+           Time.format (Time.now ()) "%d%m%Y_%Hh%Mm%Ss"
+              ~zone: (Time.Zone.local |> Lazy.force_val)
          in
          let out_fname' =
            Printf.sprintf

@@ -31,7 +31,7 @@
  *
  * *)
 
-open Core.Std
+open Core
 
 module CrawlerFilter : sig
   val sort_synthesis_data: string list list -> string list list
@@ -142,23 +142,23 @@ end = struct
     let pruned_sites = List.map pruned_synthesis ~f: (
         function
         | site :: _ -> site
-        | [] -> failwith "Ill-formed entry") |> List.dedup in
+        | [] -> failwith "Ill-formed entry") |> List.dedup_and_sort in
     let pruned_s_langs = List.map pruned_synthesis ~f: (
         function
         | _ :: _ :: s_lang :: _-> s_lang
-        | _ -> failwith "Ill-formed entry") |> List.dedup in
+        | _ -> failwith "Ill-formed entry") |> List.dedup_and_sort in
     let pruned_t_langs = List.map pruned_synthesis ~f: (
         function
         | _ :: _ :: _ :: t_lang :: _ -> t_lang
-        | _ -> failwith "Ill-formed entry") |> List.dedup in
+        | _ -> failwith "Ill-formed entry") |> List.dedup_and_sort in
     List.filteri ~f: (fun i datum ->
         match datum with
         | site :: _ :: _ :: _ :: _ :: s_lang :: _ :: _ :: t_lang :: _
-          when i > 0 -> List.mem pruned_sites site
+          when i > 0 -> List.mem pruned_sites site ~equal: String.equal
                         &&
-                        List.mem pruned_s_langs s_lang
+                        List.mem pruned_s_langs s_lang ~equal: String.equal
                         &&
-                        List.mem pruned_t_langs t_lang
+                        List.mem pruned_t_langs t_lang ~equal: String.equal
         | _ when i = 0 -> true
         | _ -> false)
 
@@ -168,7 +168,7 @@ end = struct
    * PATH, or the specified language is not installed, then the helper returns
    * the empty list.*)
   let get_misspelled_words ~data ~language =
-    let open Async.Std in
+    let open Async in
     let lang =
       Printf.sprintf "--lang=%s_%s" language (String.uppercase language) in
     let stdout_path = Sexplib.Path.parse ".stdout" in
@@ -235,7 +235,7 @@ end = struct
       fun i datum ->
         if i > 0 then
           let score = List.nth_exn datum 9 in
-          not @@ Array.mem outliers (Float.of_string score)
+          not @@ Array.mem outliers (Float.of_string score) ~equal: Float.equal
         else
           false) in
     let data''' =
@@ -260,7 +260,9 @@ end = struct
             [[De]; [Bg]; [De; Fr; Nl]; [Hr]; [El]; [Cs]; [Da]; [Nl]; [En]; [Et];
              [Fi]; [Fr]; [De]; [El]; [Hu]; [Is]; [Ga; En]; [It]; [Lv]; [Lt];
              [De; Fr]; [Mt; En]; [Pl]; [Pt]; [Ro]; [Sk]; [Sl]; [Es]; [Sv]; [No]]
-          |> Map.of_alist_exn ~comparator: EeaCountry_comparator.comparator in
+          |> Map.of_alist_exn (module struct
+                                type t = eea_country
+                                include EeaCountry_comparator end) in
         (*XXX: Very similar to the eponymous function in the reporter, safe that
          * here we use option types.*)
         let country_from_tld = function
@@ -322,16 +324,24 @@ end = struct
               | None :: None :: [] -> true
               | Some c :: None :: [] ->
                   List.mem (Map.find_exn official_languages c) eea_s_lang
+                    ~equal: ((=))
               | None :: Some c :: [] ->
                   List.mem (Map.find_exn official_languages c) eea_t_lang
+                    ~equal: ((=))
               | Some c :: Some c' :: [] ->
-                  List.mem (Map.find_exn official_languages c) eea_s_lang ||
+                  List.mem (Map.find_exn official_languages c) eea_s_lang
+                    ~equal: ((=))
+                  ||
                   List.mem (Map.find_exn official_languages c') eea_t_lang
+                    ~equal: ((=))
               | None :: [] -> true
               | Some c :: [] ->
                   let official_langs = Map.find_exn official_languages c in
-                  List.mem official_langs eea_s_lang ||
+                  List.mem official_langs eea_s_lang
+                    ~equal: ((=))
+                  ||
                   List.mem official_langs eea_t_lang
+                    ~equal: ((=))
               | _ ->
                   failwith "Ill-formed original site information"
             end
@@ -430,7 +440,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically sort and prune reporting data"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(
@@ -473,7 +483,7 @@ let command =
       prune_different_origins prune_missspellings_percent lratio_range ->
       let open CrawlerFilter in
       let read_report ?(delimiter=';') filename =
-        let open Core.Std in
+        let open Core in
         if Sys.file_exists_exn filename then
           Csv.load filename ~separator: delimiter
         else

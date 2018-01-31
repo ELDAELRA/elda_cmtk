@@ -34,7 +34,7 @@
  *     chosen.
  *  6. If cohttp-server-async is missing, fall back on python3 -m http.server.
  *     *)
-open Core.Std
+open Core
 
 open Cohttp_async
 open Tyxml
@@ -103,7 +103,7 @@ let launch_server ~page_title ~docroot ~port () =
   Out_channel.write_all temp_index index_html;
   begin
     begin
-      let open Async.Std in
+      let open Async in
       let handle =
         try_with
           (fun () ->
@@ -117,7 +117,7 @@ let launch_server ~page_title ~docroot ~port () =
           | Error _ ->
               let fallback_index =
                 Filename.concat (Filename.dirname temp_index) "index.html" in
-              Core.Std.Unix.rename ~src: temp_index ~dst: fallback_index;
+              Core.Unix.rename ~src: temp_index ~dst: fallback_index;
               cleanup_sigint fallback_index;
               Process.run_expect_no_output_exn
                 ~prog: "python3"
@@ -130,7 +130,7 @@ let launch_server ~page_title ~docroot ~port () =
   end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically serve locally third-party documents"
     ~readme: (fun () -> "=== Copyright © 2017 ELDA - All rights reserved ===\n")
     Command.Spec.(

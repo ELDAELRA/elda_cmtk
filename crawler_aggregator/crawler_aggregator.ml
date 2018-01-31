@@ -42,7 +42,7 @@
  *      - global length ratio mean and variance
  * *)
 
-open Core.Std
+open Core
 
 module CrawlerIo : sig
   type per_site_aggreg_t = {site: string; provenance: string;
@@ -165,7 +165,9 @@ end = struct
       )
       |> List.concat
       |> List.dedup
-      |> Map.of_alist_exn ~comparator: Lang_pair_Comparator.comparator in
+      |> Map.of_alist_exn (module struct
+                            type t = string * string
+                            include Lang_pair_Comparator end) in
     let dim = List.length all_langs in
     let data_a = Array.make_matrix ~dimx: dim ~dimy: dim Float.infinity in
     List.iteri all_langs ~f: (

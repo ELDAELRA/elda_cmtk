@@ -178,7 +178,7 @@ module Data_common = struct
     | "Norway" -> Country Norway
     | alien_entry ->
       let extension_str = Str.split (Str.regexp "[:() ]") alien_entry
-                          |> Core.Std.List.last_exn in
+                          |> Core.List.last_exn in
       let extension =
         begin
           match extension_str with
@@ -197,7 +197,7 @@ module Data_common = struct
       Unknown extension
 
   (** Helper to convert Float.-nan to 0.*)
-  let un_nan num = if Core.Std.Float.(compare num nan) = 0 then 0. else num
+  let un_nan num = if Core.Float.(compare num nan) = 0 then 0. else num
 end
 
 (** Generic report type.*)
@@ -208,7 +208,7 @@ module type Data_t = sig
   val t_init_psql: db: Postgresql.connection -> unit
   val t_save_psql: db: Postgresql.connection -> data: t list -> unit
   val t_get_psql: db: Postgresql.connection -> data: t list -> t list
-  val t_convert: string Core.Std.String.Map.t -> t
+  val t_convert: string Core.String.Map.t -> t
   val t_lazy_get: ?custom: (t -> bool) -> (t, [< `RO | `RW]) Orm.Db.t -> unit ->
     (unit -> t option)
 end
@@ -244,7 +244,7 @@ module Data_report_synthesis = struct
 
   (** Convert from-CSV entry to synthesis report type.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     {crawled_web_site = String.Map.find_exn entry "Crawled web site";
      provenance =
        String.Map.find_exn entry "Provenance"
@@ -318,7 +318,7 @@ module Data_report_synthesis_shallow = struct
 
   (** Save data to psql table.*)
   let t_save_psql ~(db: Postgresql.connection) ~data =
-    let open Core.Std in
+    let open Core in
     let query_params =
       List.map data ~f: (
         function
@@ -357,7 +357,7 @@ module Data_report_synthesis_shallow = struct
 
   (** Get data items from psql table.*)
   let t_get_psql ~(db: Postgresql.connection) ~data  =
-    let open Core.Std in
+    let open Core in
     let query_base_fmt = Printf.sprintf
       "SELECT * FROM t WHERE \
        crawled_web_site IN (%s) AND \
@@ -416,7 +416,7 @@ module Data_report_synthesis_shallow = struct
 
   (** Convert from-CSV entry to synthesis report type.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     {crawled_web_site = String.Map.find_exn entry "Crawled web site";
      provenance = String.Map.find_exn entry "Provenance";
      source_language = String.Map.find_exn entry "Source language";
@@ -478,7 +478,7 @@ module Data_report_full = struct
 
   (** From-CSV to specific full report type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     {crawled_web_site = String.Map.find_exn entry "Crawled web site";
      original_web_site = String.Map.find_exn entry "Original web site";
      provenance =
@@ -544,7 +544,7 @@ module Data_report_full_shallow = struct
 
   (** Save data to psql table.*)
   let t_save_psql ~(db: Postgresql.connection) ~data =
-    let open Core.Std in
+    let open Core in
     let escape_quotes = Str.global_replace (Str.regexp "'") "''" in
     let query_params =
       List.map data ~f: (
@@ -580,7 +580,7 @@ module Data_report_full_shallow = struct
 
   (** Get data items from psql table.*)
   let t_get_psql ~(db: Postgresql.connection) ~data  =
-    let open Core.Std in
+    let open Core in
     let query_base_fmt = Printf.sprintf
       "SELECT * FROM t WHERE \
        crawled_web_site IN (%s) AND \
@@ -638,7 +638,7 @@ module Data_report_full_shallow = struct
 
   (** From-CSV to specific full report type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     let open Data_common in
     {crawled_web_site = String.Map.find_exn entry "Crawled web site";
      original_web_site = String.Map.find_exn entry "Original web site";
@@ -693,7 +693,7 @@ module Data_per_site_aggregation = struct
 
   (** From-CSV entry to specific per-site aggregation type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     {web_site = String.Map.find_exn entry "Web site";
      provenance =
        String.Map.find_exn entry "Provenance"
@@ -765,7 +765,7 @@ module Data_per_site_aggregation_shallow = struct
 
   (** From-CSV entry to specific per-site aggregation type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     let open Data_common in
     {web_site = String.Map.find_exn entry "Web site";
      provenance = String.Map.find_exn entry "Provenance";
@@ -832,7 +832,7 @@ module Data_per_language_pair_aggregation = struct
 
   (** From-CSV entry to per-language pair aggregation type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     {source_language =
        String.Map.find_exn entry "Source language"
        |> eea_language_from_string;
@@ -906,7 +906,7 @@ module Data_per_language_pair_aggregation_shallow = struct
 
   (** From-CSV entry to per-language pair aggregation type converter.*)
   let t_convert entry =
-    let open Core.Std in
+    let open Core in
     let open Data_common in
     {source_language = String.Map.find_exn entry "Source language";
      target_language = String.Map.find_exn entry "Target language";
@@ -948,7 +948,7 @@ module type CrawlerDumper_t = sig
   val dump_to_db: ?warn: bool -> backend: [`Sqlite | `Postgresql] ->
     username: string -> password: string -> db_filename: string ->
     data: t list -> unit
-  val to_t: input: string Core.Std.String.Map.t list -> t list
+  val to_t: input: string Core.String.Map.t list -> t list
 end
 
 (** Generic dumper functor implementation.*)
@@ -963,14 +963,14 @@ module CrawlerDumper (Data : Data_t) : CrawlerDumper_t = struct
         let db_handle = t_init db_filename in
         let values = t_lazy_get ~custom: (fun _ -> true) db_handle () in
         let i = ref 0 in
-        Core.Std.List.iter data ~f: (
+        Core.List.iter data ~f: (
           fun item ->
             begin
               if warn = true then
                 let items =
-                  Core.Std.List.map (Core.Std.List.range 0 @@ List.length data)
+                  Core.List.map (Core.List.range 0 @@ List.length data)
                     ~f: (fun _ -> lazy (values ())) in
-                if Core.Std.List.exists items ~f: (
+                if Core.List.exists items ~f: (
                     fun el ->
                       let dat = Lazy.force el in
                       if dat = Some item then true else false) = true then
@@ -990,7 +990,7 @@ module CrawlerDumper (Data : Data_t) : CrawlerDumper_t = struct
             end;
             t_save ~db: db_handle item)
     | `Postgresql ->
-      let open Core.Std in
+      let open Core in
       let index_in alist elem =
         try
           List.find_mapi_exn alist ~f: (
@@ -1026,7 +1026,11 @@ module CrawlerDumper (Data : Data_t) : CrawlerDumper_t = struct
             if List.length results > 0 then
               begin
                 Printf.printf "%s\n" "About to duplicate data. Continue [y/N]?";
-                let yn = read_line () in
+                let yn =
+                  begin
+                    Out_channel.(flush stdout);
+                    In_channel.(input_line_exn stdin)
+                  end in
                 match yn with
                 | "yes" | "Y" | "y" | "Yes" | "YES" -> Printf.printf "%s\n" "ok"
                 | _ -> exit 1
@@ -1038,7 +1042,7 @@ module CrawlerDumper (Data : Data_t) : CrawlerDumper_t = struct
   (** Generic converter helper, from CSV to list of specific report type
       entries.*)
   let to_t ~input =
-    Core.Std.List.map input ~f: (fun iel -> Data.t_convert iel)
+    Core.List.map input ~f: (fun iel -> Data.t_convert iel)
 end
 
 (** Driver of the dumper. Main goal: automatically get the input report kind
@@ -1048,10 +1052,10 @@ module CrawlerDumperDriver : sig
   val dump_to_db: ?shallow: bool -> ?warn: bool ->
     backend: [`Sqlite | `Postgresql] -> username: string -> password: string ->
     kind: data_kind_t -> db_filename: string ->
-    data: string Core.Std.String.Map.t list -> unit -> unit
-  val get_kind_from_data: data: string Core.Std.String.Map.t list -> data_kind_t
+    data: string Core.String.Map.t list -> unit -> unit
+  val get_kind_from_data: data: string Core.String.Map.t list -> data_kind_t
   val load_data_from_file: filename: string -> delimiter: char ->
-    string Core.Std.String.Map.t list
+    string Core.String.Map.t list
 
 end = struct
 
@@ -1094,7 +1098,7 @@ end = struct
 
   (** Helper to load mapped data from CSV file*)
   let load_data_from_file ~filename ~delimiter =
-    let open Core.Std in
+    let open Core in
     let data = Csv.load filename ~separator: delimiter in
     match data with
     | hd :: tl ->
@@ -1106,7 +1110,7 @@ end = struct
 
   (** Helper to infer data kind from data.*)
   let get_kind_from_data ~data =
-    let open Core.Std in
+    let open Core in
     match data with
     | first :: _ -> 
       let keyset = String.Map.keys first |> String.Set.of_list in
@@ -1152,7 +1156,7 @@ end = struct
 end
 
 let main () =
-  let open Core.Std in
+  let open Core in
   let open CrawlerDumperDriver in
   let usage_msg =
     String.concat

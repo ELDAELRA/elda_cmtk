@@ -30,7 +30,7 @@
    * Generate appropriate commands
    * Launch the commands in parallel.
  * *)
-open Core.Std
+open Core
 
 exception Not_implemented_error
 
@@ -152,7 +152,7 @@ end = struct
   let run_commands ~urls_file_name ~root_dir
       ?(lang="bg;hr;cs;da;nl;en;et;fi;fr;de;el;hu;ga;it;lv;lt;pl;pt;ro;sl;es;sv;no")
       ~version ~crawl ~mtlen () =
-    let open Async.Std in
+    let open Async in
     Parmap.pariter (
       fun url ->
         let dest_dir = make_dir_from_url ~root_dir url in
@@ -302,7 +302,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically launch the crawler"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved  ===\n")
     Command.Spec.(

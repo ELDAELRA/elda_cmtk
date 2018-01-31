@@ -26,7 +26,7 @@
  *
  * *)
 
-open Core.Std
+open Core
 
 module CrawlerPlotter : sig 
 
@@ -83,28 +83,29 @@ end = struct
     List.Assoc.find_exn (
       List.mapi data' ~f:
         (fun i language -> Float.of_int (i + 1), language)
-    ) datum
+    ) datum ~equal: Float.equal
 
   (** Helper to map counts to the y-axis.*)
   let counts_to_yaxis count =
-    let open Core.Std in
+    let open Core in
     Printf.sprintf "%d TUs" (Int.of_float count)
 
   (** Helper to get per-language pair count.*)
   let lpairs_counts =
-    let open Core.Std in
+    let open Core in
     List.map ~f: (fun {tu_counts} -> Float.of_int tu_counts)
 
   (** Interface function to plot per-language pair histogram (in terms of TU
    * counts).*)
   let plot_per_language_pair_tu_histogram raw_data source_language
       plot_filename =
-    let open Core.Std in
+    let open Core in
     let module A = Archimedes in
     let data = List.filter raw_data ~f: (
         function
         | {language_pair = {language = lang_s}, {language = lang_t}}
-          when List.mem [lang_s; lang_t] source_language -> true
+          when List.mem [lang_s; lang_t] source_language ~equal: String.equal
+            -> true
         | _ -> false) in
     let canvas = A.init ~text: 8. ["cairo"; "PDF"; plot_filename] in
     A.Viewport.xlabel canvas "Target languages";
@@ -128,7 +129,7 @@ end = struct
     List.iter2_exn xes yes ~f: (
       fun x y ->
         A.Viewport.text
-          ~rotate: (4. *. atan 1. /. 4.) (* pi / 4 radians = 45 degrees.*)
+          ~rotate: (4. *. Float.atan 1. /. 4.) (* pi / 4 radians = 45 degrees.*)
           canvas x y Int.(to_string @@ of_float y));
     A.Array.xy
       ~style: (`Bars 0.1)
@@ -189,7 +190,7 @@ let plotting_driver ~per_lang_aggreg_fname ?(delimiter=';') () =
   )
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Automatically plot per-language language pair distributions of \
                TU counts"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")

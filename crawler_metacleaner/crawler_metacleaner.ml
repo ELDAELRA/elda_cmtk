@@ -30,7 +30,7 @@
     encounters duplicate *base* URLs (i.e. www.toto.fr), only the first one is
     kept and the subsequent ones are added to a _duplicates directory.
 *)
-open Core.Std
+open Core
 
 module CrawlerMetaCleaner : sig 
   val clean_duplicates: ?regex: bool -> ?dest: string option ->
@@ -56,7 +56,8 @@ end = struct
   let rec get_dirs' root acc =
     if Sys.is_file_exn root then acc
     else List.map (Sys.ls_dir root) ~f: (fun x ->
-        let acc' = if not (List.mem acc root) then root :: acc else acc in
+        let acc' = if not (List.mem acc root ~equal: String.equal) 
+                    then root :: acc else acc in
         get_dirs' (Filename.concat root x) acc')
          |> List.concat
          |> List.dedup
@@ -115,7 +116,10 @@ end = struct
     let crawled_dirs =
       get_crawled_dirs ~regex root
       |> List.sort ~cmp: (fun dir_x dir_y ->
-          let modif_time dir = Unix.((stat dir).st_mtime) |> Time.of_float in
+          let modif_time dir =
+            Unix.((stat dir).st_mtime)
+            |> Time.Span.of_sec
+            |> Time.of_span_since_epoch in
           sign (Time.compare (modif_time dir_x) (modif_time dir_y))) in
     let unique_crawled_dirs =
       List.dedup crawled_dirs ~compare: (fun x y ->
@@ -177,7 +181,7 @@ end = struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Clean-up duplicate crawled sites across batches"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(

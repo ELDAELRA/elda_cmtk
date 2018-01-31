@@ -30,7 +30,7 @@
        destination directory.
 
 *)
-open Core.Std
+open Core
 
 module CrawlerUtils : sig 
   val walk: ?depth: int -> string -> string list
@@ -94,7 +94,7 @@ end = struct
               pattern
               (List.map subdirs' ~f: (Filename.concat root) @ acc))
         |> List.concat
-        |> List.dedup
+        |> List.dedup_and_sort
     with
     | Sys_error _ -> []
 
@@ -114,7 +114,7 @@ module CrawlerZip = struct
         | Some dir -> Filename.realpath dir in
       let zip_full_name =
         Filename.concat dest_dir zipname in
-      let open Async.Std in
+      let open Async in
       let handle =
         Process.run_exn ~prog: "zip" ~args: (zip_full_name :: files) () in
       Thread_safe.block_on_async_exn (fun () -> handle) |> ignore
@@ -162,7 +162,7 @@ struct
 end
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary: "Back-up crawled data"
     ~readme: (fun () -> "=== Copyright © 2016 ELDA - All rights reserved ===\n")
     Command.Spec.(
