@@ -16,6 +16,7 @@ install: [
     ["make" "doc"]
 ]
 remove: [
+    ["rm" "-fr" "%{lib}%/crawler_utils/"]
     ["rm" "-f" "%{bin}%/crawler_aggregator" "%{bin}%/crawler_backuper"]
     ["rm" "-f" "%{bin}%/crawler_dbdumper" "%{bin}%/crawler_dbretriever"]
     ["rm" "-f" "%{bin}%/crawler_filter" "%{bin}%/crawler_launcher"]

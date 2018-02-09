@@ -17,6 +17,15 @@ Flag strict
   Description: Strict compile-time checks
   Default:     true
 
+Library crawler_utils
+  Path:           .
+  Install:        true
+  Modules:        Crawler_utils
+  CompiledObject: native
+  BuildDepends:
+    str,
+    core
+
 Executable crawler_aggregator
   Path:           crawler_aggregator
   Install:        true
@@ -177,7 +186,8 @@ Executable crawler_qcintegrator
     core,
     re2,
     ppx_jane,
-    parmap
+    parmap,
+    crawler_utils
 
 Executable crawler_tmxbuilder
   Path:           crawler_tmxbuilder
@@ -210,7 +220,8 @@ Document elda_cmtk
   Title: API reference for the ELDA crawler management toolkit (CMTK)
   Type:  Ocamlbuild (0.4)
   XOcamlbuildPath: .
-  XOCamlbuildModules: crawler_aggregator/Crawler_aggregator,
+  XOCamlbuildModules: Crawler_utils,
+                      crawler_aggregator/Crawler_aggregator,
                       crawler_backuper/Crawler_backuper,
                       crawler_dbdumper/Crawler_dbdumper,
                       crawler_dbretriever/Crawler_dbretriever,

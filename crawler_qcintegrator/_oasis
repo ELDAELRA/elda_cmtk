@@ -23,7 +23,8 @@ Executable crawler_qcintegrator
     core,
     re2,
     ppx_jane,
-    parmap
+    parmap,
+    crawler_utils
 
 AlphaFeatures: ocamlbuild_more_args
 Document crawler_qcintegrator

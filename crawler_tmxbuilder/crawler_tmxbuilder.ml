@@ -560,15 +560,21 @@ end = struct
 
   let enrich_and_prune_tus ~ths_inf ~ths_sup tus =
     let aggregs =
-      List.filter tus ~f: (
-        function
-          | _, [({site = site_1; _}, _);
-                ({site = site_2; _}, _)] when site_1 = site_2 -> true
-          | _ -> false)
+      let strip_prefix site =
+        Re2.split (Re2.create_exn {|[/.]|}) site
+        |> List.rev |> Fn.flip List.take 2 |> List.rev
+        |> String.concat ~sep: "." in
+      List.sort tus ~cmp: (fun prev next ->
+        match prev, next with
+        |  (_, ({site = site_p; _}, _) :: _),
+           (_, ({site = site_n; _}, _) :: _) ->
+            String.compare (strip_prefix site_p) (strip_prefix site_n)
+        | _ -> 0)
       |> List.group ~break:(fun prev next ->
           match prev, next with
           |  (_, ({site = site_p; _}, _) :: _),
-             (_, ({site = site_n; _}, _) :: _) when site_p <> site_n -> true
+             (_, ({site = site_n; _}, _) :: _)
+             when strip_prefix site_p <> strip_prefix site_n -> true
           | _ -> false) in
     let thresholds =
       List.zip_exn ths_inf ths_sup
