@@ -123,12 +123,12 @@ module Index : Index_t with type t = string = struct
 end
 
 (** Main module. *)
-module Crawler_qcintegrator : sig
+module Crawler_qcintegrator : sig 
   val manage_tus: ?delimiter: char -> ?legacy_annotations: bool ->
                   ?no_alignment_score: bool ->
-                  ?no_further_information: bool -> ?cols: int list option ->
-                  tu_file: string -> sample_dir: string -> psi_file: string ->
-                  out_file: string -> unit -> unit
+                  ?no_further_information: bool -> tu_file: string ->
+                  sample_dir: string -> psi_file: string -> out_file: string ->
+                  unit -> unit
 end = struct
   (** Manually-annotated error type. *)
   type error_t =
@@ -218,15 +218,9 @@ end = struct
 
   (** Helper to parse TU entry as yielded by the CSV file reader. *)
   let parse_tu_entry ~delimiter
-                     ~cols
                      ?(legacy_annotations=false)
                      ?(no_alignment_score=false)
                      ?(no_further_information=false) entry =
-    let make_id ~cols bits =
-      prune_data ~cols [bits]
-      |> List.hd_exn
-      |> String.concat ~sep: (String.escaped "☯")
-      |> Md5.digest_string |> Digest.to_hex in
     match entry with
     | crawled_site :: original_sites :: provenance :: source_text ::
       source_token_count :: source_language :: target_text :: target_token_count
@@ -250,7 +244,7 @@ end = struct
                target_language;
                alignment_score = Float.of_string alignment_score;
                further_information;
-               id = make_id ~cols seed_id_elements}
+               id = make_id seed_id_elements}
     | _ -> None
 
   (** The Unknown type is basically for not-yet-handled sites. *)
@@ -386,7 +380,6 @@ end = struct
                  ?(legacy_annotations=false)
                  ?(no_alignment_score=false)
                  ?(no_further_information=false)
-                 ?(cols=None)
                  ~tu_file ~sample_dir ~psi_file ~out_file () =
     let data' = 
       if Sys.file_exists_exn tu_file then
@@ -403,7 +396,7 @@ end = struct
           let out_data' =
             List.map ~f: (fun entry ->
               parse_tu_entry ~delimiter ~legacy_annotations ~no_alignment_score
-                             ~no_further_information ~cols entry
+                             ~no_further_information entry
               |> handle_tu_psi ~psi_data
               |> handle_tu_qc
                 ~sampled_sites_index: (module Index : Index_t with type t = string)
@@ -444,9 +437,6 @@ let command =
       empty
       +> flag "-d" (optional_with_default ";" string)
         ~doc: " Delimiter for the reports CSV files"
-      +> flag "--columns" (optional string)
-        ~doc: " Columns that have been used in pretty-printing process when \
-                dumping to textual format for manual validation."
       +> flag "--legacy-annotations" no_arg
         ~doc: " Treat annotations as legacy, i.e. do not use all fields in \
                 computing TU identifiers; use only alignment score, further \
@@ -470,7 +460,7 @@ let command =
                (if not specified, then -rf with \"annotated_\" prepended is \
                chosen)."
     )
-    (fun delimiter' cols' legacy_annotations no_alignment_score
+    (fun delimiter' legacy_annotations no_alignment_score
          no_further_information tu_file sample_dir psi_file out_fname' ->
       let open Crawler_qcintegrator in
       let out_file =
@@ -478,13 +468,8 @@ let command =
         | None -> Filename.dirname tu_file ^/ "annotated_" ^
                   Filename.basename tu_file
         | Some out_fname -> out_fname in
-      let cols =
-        match cols' with
-        | None -> None
-        | Some cols -> Some (indexes_from_selection cols) in
       manage_tus
         ~delimiter: (Char.of_string delimiter')
-        ~cols
         ~legacy_annotations
         ~no_alignment_score ~no_further_information
         ~tu_file ~sample_dir ~psi_file

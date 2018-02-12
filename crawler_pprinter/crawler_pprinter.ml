@@ -43,8 +43,6 @@ open Crawler_utils
 
 module CrawlerPprinter : sig
 
-  val ids_from_data: string list list -> string list
-
   val pretty_print_data: ?seplines: bool -> ?fieldsep: char ->
     linesep: string -> ids: string list -> concatenate_first_lines: int ->
     string list list -> string list
@@ -87,11 +85,6 @@ end = struct
     | false -> pretty_print_csv ~separator: fieldsep data
     | true -> pretty_print_linear ~linesep ~ids ~concatenate_first_lines data
 
-  (** Function to compute row IDs for data.*)
-  let ids_from_data =
-    List.map ~f: (fun dat -> String.concat ~sep: (String.escaped "☯") dat
-                             |> Digest.string |> Digest.to_hex)
-
   (** Main pretty-printer driver.*)
   let pprint_driver ?(row_selections=None) ?(col_selections=None) 
       ?(separator=';') ~seplines ?(linesep="\n")
@@ -104,7 +97,7 @@ end = struct
       | None, Some cols' -> None, Some (indexes_from_selection cols')
       | Some rows', None -> Some (indexes_from_selection rows'), None in
     let full_data = Csv.load ~separator input_file_name in
-    let ids = ids_from_data (prune_data ~rows ~cols full_data) in
+    let ids = prune_data ~rows full_data |> List.map ~f: make_id in
     pretty_print_data ~seplines ~linesep ~ids ~concatenate_first_lines
       ~fieldsep: separator (prune_data ~rows ~cols full_data)
 end

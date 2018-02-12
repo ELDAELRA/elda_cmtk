@@ -24,7 +24,6 @@
 (* Generic common functionalities. *)
 
 open Core
-(** Generate indexes from numeric or character selections.*)
 let indexes_from_selection selection =
   Str.split (Str.regexp {|[ ]*[,;]+[ ]*|}) selection
   |> List.map ~f: (fun span ->
@@ -68,9 +67,6 @@ let indexes_from_selection selection =
     )
   |> List.concat
 
-(** Retain a specified set of indexes from CSV-retrieved data.
- *  Algorithm: prune the list list structure on the ~rows and ~cols indexes
- *  lists.*)
 let prune_data ?(rows=None) ?(cols=None) data =
   (* Sort in_list according to the order of the indexes in index_list. If
    * index_list is shorter than in_list, then only indexes present in
@@ -95,3 +91,7 @@ let prune_data ?(rows=None) ?(cols=None) data =
       fun i _ -> List.mem rows' (i + 1) ~equal: Int.equal)
   | None, Some cols' -> List.map data ~f: (fun dat -> sorti dat cols')
   | None, None -> data
+
+let make_id bits =
+  String.concat ~sep: (String.escaped "☯") bits
+  |> Md5.digest_string |> Digest.to_hex
