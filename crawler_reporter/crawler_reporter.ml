@@ -252,7 +252,8 @@ end = struct
     | Com
     | Int
     | Net
-    | Biz [@@deriving sexp]
+    | Biz
+    | Unknown [@@deriving sexp]
 
   type unknown_country = [`Unknown]
 
