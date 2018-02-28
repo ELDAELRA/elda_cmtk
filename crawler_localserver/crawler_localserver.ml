@@ -35,6 +35,7 @@
  *  6. If cohttp-server-async is missing, fall back on python3 -m http.server.
  *     *)
 open Core
+open Re2.Std
 
 open Cohttp_async
 open Tyxml
@@ -59,11 +60,9 @@ let urls_from_directory ?(domain="http://localhost") ~port root_directory =
             (Printf.sprintf "%s is not a directory" root_directory))
   else
     let documents = walk root_directory in
-    List.map documents ~f: (
-      Fn.compose
-        Filename.basename
-        (String.concat ~sep: ":" [domain; Int.to_string port]
-         |> Filename.concat))
+    List.map documents ~f: (fun doc ->
+      String.concat ~sep: ":" [domain; Int.to_string port]
+      ^/ String.concat @@ Re2.split (Re2.create_exn root_directory) doc)
 
 (** Build HTML structure from URL listing and specified title. *)
 let html_from_urls ~page_title urls =

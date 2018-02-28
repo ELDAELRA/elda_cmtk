@@ -210,6 +210,7 @@ Executable crawler_localserver
   BuildDepends:
     threads,
     core,
+    re2,
     async,
     cohttp.async,
     tyxml.ppx
