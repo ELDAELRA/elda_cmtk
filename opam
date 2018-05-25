@@ -58,6 +58,5 @@ depends: [
   "re" {build}
   "re2" {build}
   "xml-light" {build}
-  "cohttp-async" {build}
   "tyxml-ppx" {build}
 ]

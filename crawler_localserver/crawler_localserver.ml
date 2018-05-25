@@ -37,7 +37,6 @@
 open Core
 open Re2.Std
 
-open Cohttp_async
 open Tyxml
 
 exception Elda_cmtk_localserver_error of string

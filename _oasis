@@ -212,7 +212,6 @@ Executable crawler_localserver
     core,
     re2,
     async,
-    cohttp.async,
     tyxml.ppx
 
 
