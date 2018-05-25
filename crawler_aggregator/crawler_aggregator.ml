@@ -164,7 +164,11 @@ end = struct
            (lang_2, lang_2), Float.infinity]
       )
       |> List.concat
-      |> List.dedup
+      |> List.dedup_and_sort
+        ~compare: (Tuple2.compare ~cmp1: (Tuple2.compare
+                                            ~cmp1: String.compare
+                                            ~cmp2: String.compare)
+                                  ~cmp2: Float.compare)
       |> Map.of_alist_exn (module struct
                             type t = string * string
                             include Lang_pair_Comparator end) in
@@ -309,7 +313,7 @@ end = struct
     let diff_tu_ratio_and_volume in_site =
       let all, (diff, difflist) = count_all_and_diff in_site in
       ((Float.of_int @@ diff) /.  (Float.of_int @@ all),
-       List.dedup difflist |> List.length) in
+       List.dedup_and_sort ~compare: String.compare difflist |> List.length) in
     List.map aggregs ~f: (List.map ~f: extract_per_site_data)
     |> List.filter ~f: ((<>) [[]])
     |> List.map ~f: (fun per_site_info ->
@@ -323,7 +327,8 @@ end = struct
              List.fold per_site_info
                ~init: (extract_language_information head)
                ~f: (fun prev next -> List.append
-                       prev (extract_language_information next)) |> List.dedup;
+                       prev (extract_language_information next))
+             |> List.dedup_and_sort ~compare: String.compare;
            token_counts =
              List.fold per_site_info
                ~init: 0
@@ -361,7 +366,7 @@ end = struct
    *  Algorithm: group data on a per-language pair list, then aggregate all
    *  statistics across all sites for a given language pair.*)
   let aggregate_data_per_language_pair data =
-    let aggregs = List.sort data ~cmp: (fun prev next ->
+    let aggregs = List.sort data ~compare: (fun prev next ->
         match prev, next with
         | _ :: _ :: l_1 :: l_2 ::_, _ :: _ :: l_1' :: l_2' :: _ ->
           let l_1_2 = String.concat [l_1; l_2] ~sep: ";" in

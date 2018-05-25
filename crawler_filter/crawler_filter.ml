@@ -111,7 +111,7 @@ end = struct
   (** Interface function to sort entries in the report data according to the
    *  specifications listed in the preamble of this file.*)
   let sort_synthesis_data =
-    List.sort ~cmp: (fun x y ->
+    List.sort ~compare: (fun x y ->
         match x, y with
         (*don't sort site-wise!*)
         | site :: _, site' :: _ when site' <> site -> compare site site
@@ -139,18 +139,24 @@ end = struct
         | _ -> false)
 
   let project_pruning_on_full_data ~pruned_synthesis =
-    let pruned_sites = List.map pruned_synthesis ~f: (
+    let pruned_sites =
+      List.map pruned_synthesis ~f: (
         function
         | site :: _ -> site
-        | [] -> failwith "Ill-formed entry") |> List.dedup_and_sort in
-    let pruned_s_langs = List.map pruned_synthesis ~f: (
+        | [] -> failwith "Ill-formed entry")
+      |> List.dedup_and_sort ~compare: String.compare in
+    let pruned_s_langs =
+      List.map pruned_synthesis ~f: (
         function
         | _ :: _ :: s_lang :: _-> s_lang
-        | _ -> failwith "Ill-formed entry") |> List.dedup_and_sort in
-    let pruned_t_langs = List.map pruned_synthesis ~f: (
+        | _ -> failwith "Ill-formed entry")
+      |> List.dedup_and_sort ~compare: String.compare in
+    let pruned_t_langs =
+      List.map pruned_synthesis ~f: (
         function
         | _ :: _ :: _ :: t_lang :: _ -> t_lang
-        | _ -> failwith "Ill-formed entry") |> List.dedup_and_sort in
+        | _ -> failwith "Ill-formed entry")
+      |> List.dedup_and_sort ~compare: String.compare in
     List.filteri ~f: (fun i datum ->
         match datum with
         | site :: _ :: _ :: _ :: _ :: s_lang :: _ :: _ :: t_lang :: _

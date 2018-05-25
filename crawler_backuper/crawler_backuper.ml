@@ -94,7 +94,7 @@ end = struct
               pattern
               (List.map subdirs' ~f: (Filename.concat root) @ acc))
         |> List.concat
-        |> List.dedup_and_sort
+        |> List.dedup_and_sort ~compare: String.compare
     with
     | Sys_error _ -> []
 

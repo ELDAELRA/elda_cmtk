@@ -74,7 +74,7 @@ end = struct
     List.map data ~f: (
       function
       | {language_pair = _, {language}} -> language)
-    |> List.dedup
+    |> List.dedup_and_sort ~compare: String.compare
 
   (** Helper function to generate plot-related x-axis to language pair
    * mapping.*)

@@ -332,7 +332,7 @@ module Data_report_synthesis_shallow = struct
                                      |> List.last_exn |> String.length)
                      [tu_alignment_score_mean; tu_alignment_score_variance;
                       tu_length_ratio_mean; tu_length_ratio_variance]
-            |> List.max_elt ~cmp: Int.compare |> Option.value ~default: 6 in
+            |> List.max_elt ~compare: Int.compare |> Option.value ~default: 6 in
           Printf.sprintf
             "('%s', '%s', '%s', '%s', %d, %d, %d, %.*f, %.*f, %.*f, %.*f)"
             crawled_web_site provenance source_language target_language
@@ -386,7 +386,7 @@ module Data_report_synthesis_shallow = struct
         ~f: (Fn.compose
                (String.concat ~sep: ",") @@
                Fn.compose (List.map ~f: (fun el -> Printf.sprintf "'%s'" el)) @@
-                 Fn.compose List.dedup Array.to_list)
+                 Fn.compose (List.dedup_and_sort ~compare: String.compare) Array.to_list)
       end in
     match query_params with
     | [crawled_web_sites; provenances; source_languages; target_languages] ->
@@ -613,7 +613,8 @@ module Data_report_full_shallow = struct
         ~f: (Fn.compose
                (String.concat ~sep: ",") @@
                Fn.compose (List.map ~f: (fun el -> Printf.sprintf "'%s'" el)) @@
-                 Fn.compose List.dedup Array.to_list)
+               Fn.compose (List.dedup_and_sort ~compare: String.compare)
+                          Array.to_list)
       end in
     match query_params with
     | [crawled_web_sites; original_web_sites; provenances; source_languages;

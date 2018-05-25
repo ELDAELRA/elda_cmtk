@@ -564,7 +564,7 @@ end = struct
         Re2.split (Re2.create_exn {|[/.]|}) site
         |> List.rev |> Fn.flip List.take 2 |> List.rev
         |> String.concat ~sep: "." in
-      List.sort tus ~cmp: (fun prev next ->
+      List.sort tus ~compare: (fun prev next ->
         match prev, next with
         |  (_, ({site = site_p; _}, _) :: _),
            (_, ({site = site_n; _}, _) :: _) ->

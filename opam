@@ -38,12 +38,12 @@ remove: [
 ]
 depends: [
   "archimedes" {build}
-  "async" {build & <= "v0.10.0"}
+  "async" {build}
   "base-threads" {build}
   "cairo2" {build}
   "camomile" {build}
-  "core" {build & <= "v0.10.0"}
-  "core_extended" {build & <= "v0.10.0"}
+  "core" {build}
+  "core_extended" {build}
   "csv" {build}
   "gsl" {build}
   "oasis" {build & >= "0.4"}

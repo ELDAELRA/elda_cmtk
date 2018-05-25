@@ -44,7 +44,7 @@ let indexes_from_selection selection =
               | Failure _ -> failwith "Please provide a range of numbers or \
                                        characters in the a-z, or A-Z range"
           end
-          |> List.sort ~cmp: compare
+          |> List.sort ~compare: compare
         in
         List.range ~start: `inclusive ~stop: `inclusive
           (List.hd_exn offsets) (List.last_exn offsets)

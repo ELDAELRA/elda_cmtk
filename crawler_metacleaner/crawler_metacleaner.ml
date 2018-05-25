@@ -60,7 +60,7 @@ end = struct
                     then root :: acc else acc in
         get_dirs' (Filename.concat root x) acc')
          |> List.concat
-         |> List.dedup
+         |> List.dedup_and_sort ~compare: String.compare
          |> List.filter ~f: (fun dir ->
              List.exists (Sys.ls_dir dir) ~f: (
                fun sdir ->
@@ -97,7 +97,7 @@ end = struct
         let curr_dir, _ = Filename.split root_pattern in
         Sys.ls_dir curr_dir
         |> List.map ~f: (fun sdir -> Filename.concat curr_dir sdir)
-        |> List.sort ~cmp: String.compare in
+        |> List.sort ~compare: String.compare in
     List.map roots ~f: get_dirs
     |> List.concat
     |> List.filter ~f: (fun dir ->
@@ -115,7 +115,7 @@ end = struct
       | true -> ((+) 0) in
     let crawled_dirs =
       get_crawled_dirs ~regex root
-      |> List.sort ~cmp: (fun dir_x dir_y ->
+      |> List.sort ~compare: (fun dir_x dir_y ->
           let modif_time dir =
             Unix.((stat dir).st_mtime)
             |> Time.Span.of_sec
@@ -148,7 +148,7 @@ end = struct
             let out_candidates =
               try
                 Sys.ls_dir dest_dir
-                |> List.sort ~cmp: String.compare
+                |> List.sort ~compare: String.compare
                 |> List.filter_map ~f: (fun sdir ->
                     match Str.search_forward
                             (Str.regexp (

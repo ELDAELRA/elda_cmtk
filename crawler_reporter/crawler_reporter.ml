@@ -571,8 +571,8 @@ end = struct
             |> List.filter ~f: ((<>) "") in
           List.map orig_sites ~f: (fun o_s -> [site; o_s])
         | _ -> failwith "Ill-formed data.")
-      |> List.concat |> List.dedup |>
-      List.sort ~cmp: (fun prev next ->
+      |> List.concat
+      |> List.dedup_and_sort ~compare: (fun prev next ->
         match prev, next with
         | site :: _, site' :: _ -> compare site site'
         | x, y -> compare x y)
@@ -595,7 +595,7 @@ end = struct
           let min_len' =
             List.map synset ~f: (
               Fn.compose List.length (String.split ~on: '.' ))
-            |> List.min_elt ~cmp: Int.compare in
+            |> List.min_elt ~compare: Int.compare in
           match min_len' with
           | Some min_len ->
             (crawled_site,
@@ -607,7 +607,7 @@ end = struct
           | None -> (crawled_site, [], complement)) in
     List.map partitioned_data ~f: (function
       | crawled_site, synset_repr, complements -> synset_repr @ complements)
-    |> List.concat |> List.dedup
+    |> List.concat |> List.dedup_and_sort ~compare: String.compare
 
   type mode =
     | Monolingual

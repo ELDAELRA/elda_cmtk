@@ -140,7 +140,7 @@ end = struct
    *  Data needs to be sorted out first, first by web site, then by language
    *  pair.*)
   let group_data data =
-    let data' = List.sort data ~cmp: (fun x y ->
+    let data' = List.sort data ~compare: (fun x y ->
         match x, y with
         | _ :: site_x :: _ :: _ :: _ :: s_lang_x :: _ :: _ :: t_lang_x :: _,
           _ :: site_y :: _ :: _ :: _ :: s_lang_y :: _ :: _ :: t_lang_y :: _ ->
